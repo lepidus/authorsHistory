@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+<!--
+  * plugins/generic/AuthorsHistory/locale/en_US/locale.xml
+  *
+  -->
+<locale name="es_ES" full_name="Español">
+    <message key="plugins.generic.authorsHistory.displayName">Historial de autores</message>
+    <message key="plugins.generic.authorsHistory.description">Este plugin agrega una pestaña en la vista de lo preprint, donde se enumeran todos los envíos de los contribuyentes</message>
+</locale>

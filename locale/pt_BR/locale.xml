@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+<!--
+  * plugins/generic/AuthorsHistory/locale/pt_BR/locale.xml
+  *
+  -->
+<locale name="pt_BR" full_name="Português brasileiro">
+    <message key="plugins.generic.authorsHistory.displayName">Histórico de autores</message>
+    <message key="plugins.generic.authorsHistory.description">Este plugin adiciona uma aba na visualização do preprint, onde são listadas todas as submissões dos contribuidores</message>
+</locale>

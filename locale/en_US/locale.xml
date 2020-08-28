@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE locale SYSTEM "../../../../../lib/pkp/dtd/locale.dtd">
+<!--
+  * plugins/generic/AuthorsHistory/locale/en_US/locale.xml
+  *
+  -->
+<locale name="en_US" full_name="U.S. English">
+    <message key="plugins.generic.authorsHistory.displayName">Authors History</message>
+    <message key="plugins.generic.authorsHistory.description">This plugin adds a tab in the preprint view, where all submissions from the contributors are filled</message>
+</locale>
