@@ -13,14 +13,33 @@ import('lib.pkp.classes.db.DAO');
 
 class AuthorsHistoryDAO extends DAO {
     
-    public function getAuthorPublicationsORCID($orcid) {
+    private function getAuthorsByORCID($orcid) {
         $resultAutorzinhos = $this->retrieve(
-            "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = '" . $orcid . "'"
+            "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = '{$orcid}'"
         );
         $autorzinhos = (new DAOResultFactory($resultAutorzinhos, $this, '_authorFromRow'))->toArray();
 
+        return $autorzinhos;
+    }
+
+    private function getAuthorsByEmail($email) {
+        $resultAutorzinhos = $this->retrieve(
+            "SELECT author_id FROM authors WHERE email = '{$email}'"
+        );
+        $autorzinhos = (new DAOResultFactory($resultAutorzinhos, $this, '_authorFromRow'))->toArray();
+        
+        return $autorzinhos;
+    }
+
+    public function getAuthorsPublications($orcid, $email) {
+        $authors = $this->getAuthorsByEmail($email);
+        if($orcid) {
+            $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
+            $authors = array_unique(array_merge($authors, $authorsFromOrcid));
+        }
+
         $publicacoes = array();
-        foreach ($autorzinhos as $autorId) {
+        foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
             $submission = DAORegistry::getDAO('SubmissionDAO')->getById($author->getSubmissionId());
 
@@ -30,7 +49,7 @@ class AuthorsHistoryDAO extends DAO {
         return $publicacoes;
     }
 
-    function _authorFromRow($row) {
+    private function _authorFromRow($row) {
         return $row['author_id'];
     }
 }
