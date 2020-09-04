@@ -1,15 +1,17 @@
 <?php
 /**
- * @file plugins/generic/documentMetadataChecklist/AuthorDOIScreeningPlugin.inc.php
+ * @file plugins/generic/AuthorsHistory/AuthorsHistoryPlugin.inc.php
  *
- * @class DocumentMetadataChecklistPlugin
- * @ingroup plugins_generic_documentMetadataChecklist
+ * @class AuthorsHistoryPlugin
+ * @ingroup plugins_generic_authorsHistory
  *
- * @brief Plugin class for the Document Metadata Checklist plugin.
+ * @brief Plugin class for the Authors History plugin.
  */
 import('lib.pkp.classes.plugins.GenericPlugin');
+import('plugins.generic.AuthorsHistory.classes.AuthorsHistoryDAO');
 
-class DocumentMetadataChecklistPlugin extends GenericPlugin {
+
+class AuthorsHistoryPlugin extends GenericPlugin {
     public function register($category, $path, $mainContextId = NULL) {
 		$success = parent::register($category, $path, $mainContextId);
         
@@ -17,17 +19,46 @@ class DocumentMetadataChecklistPlugin extends GenericPlugin {
             return true;
         
         if ($success && $this->getEnabled($mainContextId)) {
+            $authorsHistoryDAO = new AuthorsHistoryDAO();
+			DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
+            HookRegistry::register('Template::Workflow::Publication', array($this, 'addToWorkflow'));
         }
         
         return $success;
     }
 
+    public function addToWorkflow($hookName, $params) {
+        $smarty =& $params[1];
+		$output =& $params[2];
+        $submission = $smarty->get_template_vars('submission');
+        $passData = array();
+
+        foreach ($submission->getAuthors() as $author) {
+            $authorData = array();
+            $authorData['nome'] = $author->getFullName();
+            $authorData['orcid'] = $author->getOrcid();
+            $authorData['email'] = $author->getEmail();
+
+            $authorsHistoryDAO = new AuthorsHistoryDAO();
+            $authorData['publications'] = $authorsHistoryDAO->getAuthorPublications($authorData['orcid'], $authorData['email']);
+
+            $passData[] = $authorData;
+        }
+
+        $smarty->assign($passData);
+		$output .= sprintf(
+			'<tab id="authorsHistory" label="%s">%s</tab>',
+			__('plugins.generic.authorsHistory.displayName'),
+			$smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))
+		);
+    }
+
     public function getDisplayName() {
-		return __('plugins.generic.documentMetadataChecklist.displayName');
+		return __('plugins.generic.authorsHistory.displayName');
 	}
 
 	public function getDescription() {
-		return __('plugins.generic.documentMetadataChecklist.description');
+		return __('plugins.generic.authorsHistory.description');
 	}
 }
