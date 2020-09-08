@@ -32,7 +32,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
         $smarty =& $params[1];
 		$output =& $params[2];
         $submission = $smarty->get_template_vars('submission');
-        $passData = array();
+        $listaDadosAutores = array();
 
         foreach ($submission->getAuthors() as $author) {
             $authorData = array();
@@ -43,10 +43,10 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             $authorData['publications'] = $authorsHistoryDAO->getAuthorPublications($authorData['orcid'], $authorData['email']);
 
-            $passData[] = $authorData;
+            $listaDadosAutores[] = $authorData;
         }
 
-        $smarty->assign($passData);
+        $smarty->assign('listaDadosAutores', $listaDadosAutores);
 		$output .= sprintf(
 			'<tab id="authorsHistory" label="%s">%s</tab>',
 			__('plugins.generic.authorsHistory.displayName'),
