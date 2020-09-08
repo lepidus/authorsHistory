@@ -41,7 +41,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             $authorData['email'] = $author->getEmail();
 
             $authorsHistoryDAO = new AuthorsHistoryDAO();
-            $authorData['publications'] = $authorsHistoryDAO->getAuthorPublications($authorData['orcid'], $authorData['email']);
+            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($authorData['orcid'], $authorData['email']);
 
             $listaDadosAutores[] = $authorData;
         }

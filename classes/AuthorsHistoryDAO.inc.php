@@ -31,25 +31,26 @@ class AuthorsHistoryDAO extends DAO {
         return $autorzinhos;
     }
 
-    public function getAuthorsPublications($orcid, $email) {
+    public function getAuthorSubmissions($orcid, $email) {
         $authors = $this->getAuthorsByEmail($email);
         if($orcid) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
         }
-
-        $publicacoes = array();
+        
+        $submissoes = array();
         foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
-            $submission = DAORegistry::getDAO('SubmissionDAO')->getById($author->getSubmissionId());
+            $publicacaoDoAutor = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
+            $submissaoDoAutor = DAORegistry::getDAO('SubmissionDAO')->getById($publicacaoDoAutor->getData('submissionId'));
 
-            $publicacoes[] = $submission->getCurrentPublication();
+            $submissoes[] = $submissaoDoAutor;
         }
-
-        return $publicacoes;
+        
+        return $submissoes;
     }
 
-    private function _authorFromRow($row) {
+    function _authorFromRow($row) {
         return $row['author_id'];
     }
 }
