@@ -13,23 +13,29 @@
     <div id="historyBody">
         {foreach from=$listaDadosAutores item=dadosAutor}
             <div class="historicoAutor">
-                <h4>{$dadosAutor['nome']}</h4>
+                <h3>{$dadosAutor['nome']}</h3>
                 {if $dadosAutor['orcid']}
-                    <span>ORCID: {$dadosAutor['orcid']}</span>
+                    <span><strong>ORCID:</strong> {$dadosAutor['orcid']}</span>
                 {else}
                     <span>{translate key="plugins.generic.authorsHistory.noORCID"}</span>
                 {/if}
-                <span>E-mail: {$dadosAutor['email']}</span>
+                <br><span><strong>E-mail:</strong> {$dadosAutor['email']}</span>
 
                 {if empty($dadosAutor['submissions'])}
-                    <p>{translate key="plugins.generic.authorsHistory.noPublications"}</p>
+                    <p class="publicacoesAutor">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
                 {else}
                 <div class="publicacoesAutor">
                     {foreach from=$dadosAutor['submissions'] item=sub}
                         <div class="publicacaoAutor">
-                            <span>{$sub->getId()}</span>
-                            <span>{$sub->getCurrentPublication()->getLocalizedFullTitle()}</span>
-                            <span>{translate key="{$sub->getStatusKey()}"}</span>
+                            <div class="idSubmissao">
+                                <span>{$sub->getId()}</span>
+                            </div>
+                            <div class="tituloSubmissao">
+                                <span>{$sub->getCurrentPublication()->getLocalizedFullTitle()}</span>
+                            </div>
+                            <div class="statusSubmissao">
+                                <span>{translate key="{$sub->getStatusKey()}"}</span>
+                            </div>
                         </div>
                     {/foreach}
                 </div>
