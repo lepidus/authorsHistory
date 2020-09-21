@@ -5,7 +5,7 @@
   *
   -->
 <locale name="pt_BR" full_name="Português brasileiro">
-    <message key="plugins.generic.authorsHistory.displayName">Histórico de autores</message>
+    <message key="plugins.generic.authorsHistory.displayName">Histórico dos autores</message>
     <message key="plugins.generic.authorsHistory.description">Este plugin adiciona uma aba na visualização do preprint, onde são listadas todas as submissões dos contribuidores</message>
 
     <message key="plugins.generic.authorsHistory.noORCID">Sem ORCID informado</message>

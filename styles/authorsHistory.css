@@ -17,7 +17,7 @@
     margin-bottom: 10px;
 }
 
-.historicoAutor span {
+.historicoAutor span, .historicoAutor a {
     margin-left: 18px;
 }
 

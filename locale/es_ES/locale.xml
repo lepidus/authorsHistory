@@ -8,6 +8,6 @@
     <message key="plugins.generic.authorsHistory.displayName">Historial de autores</message>
     <message key="plugins.generic.authorsHistory.description">Este plugin agrega una pestaña en la vista de lo preprint, donde se enumeran todos los envíos de los contribuyentes</message>
 
-    <message key="plugins.generic.authorsHistory.noORCID">No se informó ORCID/message>
+    <message key="plugins.generic.authorsHistory.noORCID">No se informó ORCID</message>
     <message key="plugins.generic.authorsHistory.noPublications">No se encontraron envíos con este ORCID o e-mail</message>
 </locale>
