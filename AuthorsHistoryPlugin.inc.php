@@ -33,12 +33,14 @@ class AuthorsHistoryPlugin extends GenericPlugin {
 		$output =& $params[2];
         $submission = $smarty->get_template_vars('submission');
         $listaDadosAutores = array();
+        $contatoCorrespondencia = $submission->getCurrentPublication()->getData('primaryContactId');
 
         foreach ($submission->getAuthors() as $author) {
             $authorData = array();
             $authorData['nome'] = $author->getFullName();
             $authorData['orcid'] = $author->getOrcid();
             $authorData['email'] = $author->getEmail();
+            $authorData['autorCorrespondente'] = ($contatoCorrespondencia == $author->getId());
 
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($authorData['orcid'], $authorData['email']);

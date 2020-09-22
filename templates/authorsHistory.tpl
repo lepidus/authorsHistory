@@ -14,6 +14,9 @@
         {foreach from=$listaDadosAutores item=dadosAutor}
             <div class="historicoAutor">
                 <h3>{$dadosAutor['nome']}</h3>
+                {if $dadosAutor['autorCorrespondente']}
+                    <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
+                {/if}
                 {if $dadosAutor['orcid']}
                     <a href="{$dadosAutor['orcid']}" target="_blank" rel="noopener noreferrer"><strong>ORCID:</strong> {$dadosAutor['orcid']}</a>
                 {else}
