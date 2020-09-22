@@ -28,10 +28,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
         return $success;
     }
 
-    public function addToWorkflow($hookName, $params) {
-        $smarty =& $params[1];
-		$output =& $params[2];
-        $submission = $smarty->get_template_vars('submission');
+    private function obterDadosAutores($submission){
         $listaDadosAutores = array();
         $contatoCorrespondencia = $submission->getCurrentPublication()->getData('primaryContactId');
 
@@ -48,8 +45,24 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             $listaDadosAutores[] = $authorData;
         }
 
-        $smarty->assign('listaDadosAutores', $listaDadosAutores);
-		$output .= sprintf(
+        return $listaDadosAutores;
+    }
+
+    public function addToWorkflow($hookName, $params) {
+        $smarty =& $params[1];
+		$output =& $params[2];
+        $submission = $smarty->get_template_vars('submission');
+        $request = Application::get()->getRequest();
+        $user = $request->getUser();
+
+        $userService = Services::get('user');
+        $smarty->assign(
+            'userIsManager',
+            $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
+        );
+        $smarty->assign('listaDadosAutores', $this->obterDadosAutores($submission));
+        
+        $output .= sprintf(
 			'<tab id="authorsHistory" label="%s">%s</tab>',
 			__('plugins.generic.authorsHistory.displayName'),
 			$smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))

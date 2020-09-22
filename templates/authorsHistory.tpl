@@ -18,7 +18,9 @@
                     <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
                 {/if}
                 {if $dadosAutor['orcid']}
-                    <a href="{$dadosAutor['orcid']}" target="_blank" rel="noopener noreferrer"><strong>ORCID:</strong> {$dadosAutor['orcid']}</a>
+                    <a href="{$dadosAutor['orcid']}" target="_blank" rel="noopener noreferrer">
+                        <strong>ORCID:</strong> {$dadosAutor['orcid']}
+                    </a>
                 {else}
                     <span>{translate key="plugins.generic.authorsHistory.noORCID"}</span>
                 {/if}
@@ -34,10 +36,24 @@
                                 <span>{$sub->getId()}</span>
                             </div>
                             <div class="tituloSubmissao">
-                                <span>{$sub->getCurrentPublication()->getLocalizedFullTitle()}</span>
+                                {if $userIsManager}
+                                    <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
+                                        {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                    </a>
+                                {else}
+                                    <span>
+                                        {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                    </span>
+                                {/if}
                             </div>
                             <div class="statusSubmissao">
-                                <span>{translate key="{$sub->getStatusKey()}"}</span>
+                                {if $sub->getStatus() == STATUS_PUBLISHED}
+                                    <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
+                                        {translate key="{$sub->getStatusKey()}"}
+                                    </a>
+                                {else}
+                                    <span>{translate key="{$sub->getStatusKey()}"}</span>
+                                {/if}
                             </div>
                         </div>
                     {/foreach}
