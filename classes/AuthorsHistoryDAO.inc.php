@@ -44,7 +44,7 @@ class AuthorsHistoryDAO extends DAO {
             $publicacaoDoAutor = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
             $submissaoDoAutor = DAORegistry::getDAO('SubmissionDAO')->getById($publicacaoDoAutor->getData('submissionId'));
 
-            if(!in_array($submissaoDoAutor, $submissoes)) {
+            if($submissaoDoAutor->getData('dateSubmitted') && !in_array($submissaoDoAutor, $submissoes)) {
                 $submissoes[] = $submissaoDoAutor;
             }
         }
