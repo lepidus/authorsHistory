@@ -8,8 +8,8 @@
 <version>
 	<application>AuthorsHistory</application>
 	<type>plugins.generic</type>
-	<release>1.0.1</release>
-	<date>23-09-2020</date>
+	<release>1.0.2</release>
+	<date>08-10-2020</date>
 	<lazy-load>1</lazy-load>
 	<class>AuthorsHistoryPlugin</class>
 </version>
