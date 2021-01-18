@@ -70,8 +70,10 @@
                     var autores = document.getElementsByClassName("publicacoesAutor")[{$autorAtual}];
                     var informacaoAutor = autores.getElementsByClassName("publicacaoAutor");
 
-                    for(iterador= {$itensPorPagina}; iterador < {$submissoesAutor}; iterador++)
-                        informacaoAutor[iterador].style.display = 'none';                        
+                    if({$itensPorPagina} < {$submissoesAutor}){
+                        for(iterador= 0; iterador < ( {$submissoesAutor} - {$itensPorPagina} ); iterador++)
+                        informacaoAutor[iterador].style.display = 'none';
+                    }
                     </script>
 
                 </div>
@@ -81,7 +83,7 @@
 
                 {translate key="plugins.generic.authorsHistory.pages"} >>
                 {for $paginaAtual=1 to $paginas}
-                    <button onclick="indexadorSubmissoes({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
+                    <button class="botoesPagina" onclick="indexadorSubmissoes({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
                 {/for} 
 
             </div>

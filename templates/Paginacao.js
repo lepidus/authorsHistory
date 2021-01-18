@@ -21,14 +21,31 @@ function submissoesRestante(submissoes,intervaloInicial,IntervaloFinal,totalSubm
     return submissoesRestante;
 }
 
+function indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina){
+    limiteInferior = totalSubmissoes - ( paginaAtual*itensPorPagina );
+    limiteSuperior = limiteInferior + itensPorPagina;
+    
+    if(limiteInferior < 0)
+        return [0,itensPorPagina + limiteInferior];
+    
+    return [limiteInferior, limiteSuperior];        
+}
+
+function indexarAntigoAtual(paginaAtual,itensPorPagina){
+    limiteInferior = (paginaAtual - 1) * itensPorPagina;
+    limiteSuperior = limiteInferior + itensPorPagina;
+
+    return [limiteInferior,limiteSuperior];
+}
+
 function indexadorSubmissoes(itensPorPagina, paginaAtual,totalSubmissoes,autorAtual){
     var autores = document.getElementsByClassName("publicacoesAutor")[autorAtual-1];
     var informacaoAutor = autores.getElementsByClassName("publicacaoAutor");
     var submissoesPagina = [];
     var demaisSubmissoes = [];
 
-    var inicio = (paginaAtual - 1) * itensPorPagina;
-    var fim = inicio + itensPorPagina;
+    var inicio = indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina)[0];
+    var fim = indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina)[1];
 
    submissoesPagina = submissoesDestaque(informacaoAutor,inicio,fim,totalSubmissoes);
    demaisSubmissoes = submissoesRestante(informacaoAutor,inicio,fim,totalSubmissoes);
