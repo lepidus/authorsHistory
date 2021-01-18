@@ -44,11 +44,10 @@ class AuthorsHistoryPlugin extends GenericPlugin {
 
             $listaDadosAutores[] = $authorData;
         }
-
         return $listaDadosAutores;
     }
 
-    public function addToWorkflow($hookName, $params) {
+    function addToWorkflow($hookName, $params) {
         $smarty =& $params[1];
 		$output =& $params[2];
         $submission = $smarty->get_template_vars('submission');

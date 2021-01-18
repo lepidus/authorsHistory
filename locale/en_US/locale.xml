@@ -7,6 +7,7 @@
 <locale name="en_US" full_name="U.S. English">
     <message key="plugins.generic.authorsHistory.displayName">Authors' History</message>
     <message key="plugins.generic.authorsHistory.description">This plugin adds a tab in the preprint view, where all submissions from the contributors are filled</message>
+    <message key="plugins.generic.authorsHistory.pages">Page(s)</message>
 
     <message key="plugins.generic.authorsHistory.noORCID">No ORCID given</message>
     <message key="plugins.generic.authorsHistory.noPublications">No submissions were found with this ORCID or e-mail</message>

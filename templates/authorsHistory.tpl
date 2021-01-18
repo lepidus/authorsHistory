@@ -5,7 +5,9 @@
  *}
 
 <link rel="stylesheet" type="text/css" href="/plugins/generic/AuthorsHistory/styles/authorsHistory.css">
+<script type="text/javascript" src="/plugins/generic/AuthorsHistory/templates/Paginacao.js"></script>
 
+{$autorAtual = 0}
 <div id="authorsHistory">
     <div id="historyHeader">
         <h2>{translate key="plugins.generic.authorsHistory.displayName"}</h2>
@@ -29,36 +31,58 @@
                 {if empty($dadosAutor['submissions'])}
                     <p class="publicacoesAutor">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
                 {else}
+
                 <div class="publicacoesAutor">
+
+                {$submissoesAutor = count($dadosAutor['submissions']) }
+                {$paginas = ceil($submissoesAutor/5) }
+        
                     {foreach from=$dadosAutor['submissions'] item=sub}
-                        <div class="publicacaoAutor">
-                            <div class="idSubmissao">
-                                <span>{$sub->getId()}</span>
+                            <div class="publicacaoAutor">
+                                <div class="idSubmissao">
+                                    <span>{$sub->getId()}</span>
+                                </div>
+                                <div class="tituloSubmissao">
+                                    {if $userIsManager}
+                                        <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
+                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                        </a>
+                                    {else}
+                                        <span>
+                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                        </span>
+                                    {/if}
+                                </div>
+                                <div class="statusSubmissao">
+                                    {if $sub->getStatus() == STATUS_PUBLISHED}
+                                        <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
+                                            {translate key="{$sub->getStatusKey()}"}
+                                        </a>
+                                    {else}
+                                        <span>{translate key="{$sub->getStatusKey()}"}</span>
+                                    {/if}
+                                </div>
                             </div>
-                            <div class="tituloSubmissao">
-                                {if $userIsManager}
-                                    <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
-                                        {$sub->getCurrentPublication()->getLocalizedFullTitle()}
-                                    </a>
-                                {else}
-                                    <span>
-                                        {$sub->getCurrentPublication()->getLocalizedFullTitle()}
-                                    </span>
-                                {/if}
-                            </div>
-                            <div class="statusSubmissao">
-                                {if $sub->getStatus() == STATUS_PUBLISHED}
-                                    <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
-                                        {translate key="{$sub->getStatusKey()}"}
-                                    </a>
-                                {else}
-                                    <span>{translate key="{$sub->getStatusKey()}"}</span>
-                                {/if}
-                            </div>
-                        </div>
+                                     
                     {/foreach}
+
+                    <script>
+                    var autores = document.getElementsByClassName("publicacoesAutor")[{$autorAtual}];
+                    var informacaoAutor = autores.getElementsByClassName("publicacaoAutor");
+
+                    for(iterador= 5; iterador < {$submissoesAutor}; iterador++)
+                        informacaoAutor[iterador].style.display = 'none';                        
+                    </script>
+
                 </div>
+                {$autorAtual = $autorAtual + 1}
                 {/if}
+
+                {translate key="plugins.generic.authorsHistory.pages"} >>
+                {for $paginaAtual=1 to $paginas}
+                    <button id="umBotao" onclick="indexadorSubmissoes(5,{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
+                {/for} 
+
             </div>
         {/foreach}
     </div>
