@@ -1,11 +1,10 @@
 function submissoesDestaque(submissoes,intervaloInicial,IntervaloFinal,totalSubmissoes){
     var submissoesDaPagina = [];
     
-    for(iterador = intervaloInicial; iterador < IntervaloFinal && iterador < totalSubmissoes ; iterador++){
-        submissoesDaPagina.push(submissoes[iterador]);
-    }            
+    for(iterador = intervaloInicial; iterador < IntervaloFinal && iterador < totalSubmissoes ; iterador++)
+        submissoesDaPagina.push(submissoes[iterador]);    
     
-    return submissoesDaPagina;
+        return submissoesDaPagina;
 }
 
 function submissoesRestante(submissoes,intervaloInicial,IntervaloFinal,totalSubmissoes){
