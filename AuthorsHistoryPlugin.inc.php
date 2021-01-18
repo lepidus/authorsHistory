@@ -60,6 +60,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
         );
         $smarty->assign('listaDadosAutores', $this->obterDadosAutores($submission));
+        $smarty->assign('itensPorPagina', $request->getContext()->getData('itemsPerPage') );
         
         $output .= sprintf(
 			'<tab id="authorsHistory" label="%s">%s</tab>',
