@@ -35,7 +35,7 @@
                 <div class="publicacoesAutor">
 
                 {$submissoesAutor = count($dadosAutor['submissions']) }
-                {$paginas = ceil($submissoesAutor/5) }
+                {$paginas = ceil($submissoesAutor/ {$itensPorPagina}) }
         
                     {foreach from=$dadosAutor['submissions'] item=sub}
                             <div class="publicacaoAutor">
@@ -70,17 +70,18 @@
                     var autores = document.getElementsByClassName("publicacoesAutor")[{$autorAtual}];
                     var informacaoAutor = autores.getElementsByClassName("publicacaoAutor");
 
-                    for(iterador= 5; iterador < {$submissoesAutor}; iterador++)
+                    for(iterador= {$itensPorPagina}; iterador < {$submissoesAutor}; iterador++)
                         informacaoAutor[iterador].style.display = 'none';                        
                     </script>
 
                 </div>
                 {$autorAtual = $autorAtual + 1}
+                
                 {/if}
 
                 {translate key="plugins.generic.authorsHistory.pages"} >>
                 {for $paginaAtual=1 to $paginas}
-                    <button id="umBotao" onclick="indexadorSubmissoes(5,{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
+                    <button onclick="indexadorSubmissoes({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
                 {/for} 
 
             </div>
