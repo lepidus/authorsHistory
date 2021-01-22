@@ -7,37 +7,37 @@
 <link rel="stylesheet" type="text/css" href="/plugins/generic/AuthorsHistory/styles/authorsHistory.css">
 <script type="text/javascript" src="/plugins/generic/AuthorsHistory/templates/pagination.js"></script>
 
-{$autorAtual = 0}
+{$currentAuthor = 0}
 <div id="authorsHistory">
     <div id="historyHeader">
         <h2>{translate key="plugins.generic.authorsHistory.displayName"}</h2>
     </div>
     <div id="historyBody">
-        {foreach from=$listDataAuthors item=dadosAutor}
+        {foreach from=$listDataAuthors item=authorData}
             <div class="historyAuthor">
-                <h3>{$dadosAutor['name']}</h3>
-                {if $dadosAutor['correspondingAuthor']}
+                <h3>{$authorData['name']}</h3>
+                {if $authorData['correspondingAuthor']}
                     <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
                 {/if}
-                {if $dadosAutor['orcid']}
-                    <a href="{$dadosAutor['orcid']}" target="_blank" rel="noopener noreferrer">
-                        <strong>ORCID:</strong> {$dadosAutor['orcid']}
+                {if $authorData['orcid']}
+                    <a href="{$authorData['orcid']}" target="_blank" rel="noopener noreferrer">
+                        <strong>ORCID:</strong> {$authorData['orcid']}
                     </a>
                 {else}
                     <span>{translate key="plugins.generic.authorsHistory.noORCID"}</span>
                 {/if}
-                <br><span><strong>E-mail:</strong> {$dadosAutor['email']}</span>
+                <br><span><strong>E-mail:</strong> {$authorData['email']}</span>
 
-                {if empty($dadosAutor['submissions'])}
+                {if empty($authorData['submissions'])}
                     <p class="authorPublications">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
                 {else}
 
                 <div class="authorPublications">
 
-                {$submissoesAutor = count($dadosAutor['submissions']) }
-                {$paginas = ceil($submissoesAutor/ {$itemsPerPage}) }
+                {$totalAuthorSubmissions = count($authorData['submissions']) }
+                {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
         
-                    {foreach from=$dadosAutor['submissions'] item=sub}
+                    {foreach from=$authorData['submissions'] item=sub}
                             <div class="publicationAuthor">
                                 <div class="idSubmission">
                                     <span>{$sub->getId()}</span>
@@ -67,24 +67,24 @@
                     {/foreach}
 
                     <script>
-                    var autores = document.getElementsByClassName("authorPublications")[{$autorAtual}];
-                    var informacaoAutor = autores.getElementsByClassName("publicationAuthor");
+                    var authors = document.getElementsByClassName("authorPublications")[{$currentAuthor}];
+                    var authorInformation = authors.getElementsByClassName("publicationAuthor");
 
-                    if({$itemsPerPage} < {$submissoesAutor}){
-                        for(iterador= 0; iterador < ( {$submissoesAutor} - {$itemsPerPage} ); iterador++)
-                        informacaoAutor[iterador].style.display = 'none';
+                    if({$itemsPerPage} < {$totalAuthorSubmissions}){
+                        for(iterator= 0; iterator < ( {$totalAuthorSubmissions} - {$itemsPerPage} ); iterator++)
+                        authorInformation[iterator].style.display = 'none';
                     }
                     </script>
 
                 </div>
-                {$autorAtual = $autorAtual + 1}
+                {$currentAuthor = $currentAuthor + 1}
                 
                 {/if}
 
                 {translate key="plugins.generic.authorsHistory.pages"} >>
-                {for $paginaAtual=1 to $paginas}
-                    <button class="pageButtons" onclick="showSubmissionsPage({$itemsPerPage},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button">
-                    {$paginaAtual}
+                {for $currentPage=1 to $totalPages}
+                    <button class="pageButtons" onclick="showSubmissionsPage({$itemsPerPage},{$currentPage},{$totalAuthorSubmissions},{$currentAuthor})" type="button">
+                    {$currentPage}
                     </button>
                 {/for} 
 
