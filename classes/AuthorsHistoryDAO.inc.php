@@ -14,21 +14,21 @@ import('lib.pkp.classes.db.DAO');
 class AuthorsHistoryDAO extends DAO {
     
     private function getAuthorsByORCID($orcid) {
-        $resultAutorzinhos = $this->retrieve(
+        $resultAuthors = $this->retrieve(
             "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = '{$orcid}'"
         );
-        $autorzinhos = (new DAOResultFactory($resultAutorzinhos, $this, '_authorFromRow'))->toArray();
+        $authors = (new DAOResultFactory($resultAuthors, $this, '_authorFromRow'))->toArray();
 
-        return $autorzinhos;
+        return $authors;
     }
 
     private function getAuthorsByEmail($email) {
-        $resultAutorzinhos = $this->retrieve(
+        $resultAuthors = $this->retrieve(
             "SELECT author_id FROM authors WHERE email = '{$email}'"
         );
-        $autorzinhos = (new DAOResultFactory($resultAutorzinhos, $this, '_authorFromRow'))->toArray();
+        $authors = (new DAOResultFactory($resultAuthors, $this, '_authorFromRow'))->toArray();
         
-        return $autorzinhos;
+        return $authors;
     }
 
     public function getAuthorSubmissions($orcid, $email) {
@@ -38,18 +38,18 @@ class AuthorsHistoryDAO extends DAO {
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
         }
         
-        $submissoes = array();
+        $submissions = array();
         foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
-            $publicacaoDoAutor = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
-            $submissaoDoAutor = DAORegistry::getDAO('SubmissionDAO')->getById($publicacaoDoAutor->getData('submissionId'));
+            $authorPublication = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
+            $authorSubmission = DAORegistry::getDAO('SubmissionDAO')->getById($authorPublication->getData('submissionId'));
 
-            if($submissaoDoAutor->getData('dateSubmitted') && !in_array($submissaoDoAutor, $submissoes)) {
-                $submissoes[] = $submissaoDoAutor;
+            if($authorSubmission->getData('dateSubmitted') && !in_array($authorSubmission, $submissions)) {
+                $submissions[] = $authorSubmission;
             }
         }
         
-        return $submissoes;
+        return $submissions;
     }
 
     function _authorFromRow($row) {

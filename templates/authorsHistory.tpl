@@ -13,10 +13,10 @@
         <h2>{translate key="plugins.generic.authorsHistory.displayName"}</h2>
     </div>
     <div id="historyBody">
-        {foreach from=$listaDadosAutores item=dadosAutor}
+        {foreach from=$listDataAuthors item=dadosAutor}
             <div class="historyAuthor">
-                <h3>{$dadosAutor['nome']}</h3>
-                {if $dadosAutor['autorCorrespondente']}
+                <h3>{$dadosAutor['name']}</h3>
+                {if $dadosAutor['correspondingAuthor']}
                     <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
                 {/if}
                 {if $dadosAutor['orcid']}
@@ -35,7 +35,7 @@
                 <div class="authorPublications">
 
                 {$submissoesAutor = count($dadosAutor['submissions']) }
-                {$paginas = ceil($submissoesAutor/ {$itensPorPagina}) }
+                {$paginas = ceil($submissoesAutor/ {$itemsPerPage}) }
         
                     {foreach from=$dadosAutor['submissions'] item=sub}
                             <div class="publicationAuthor">
@@ -70,8 +70,8 @@
                     var autores = document.getElementsByClassName("authorPublications")[{$autorAtual}];
                     var informacaoAutor = autores.getElementsByClassName("publicationAuthor");
 
-                    if({$itensPorPagina} < {$submissoesAutor}){
-                        for(iterador= 0; iterador < ( {$submissoesAutor} - {$itensPorPagina} ); iterador++)
+                    if({$itemsPerPage} < {$submissoesAutor}){
+                        for(iterador= 0; iterador < ( {$submissoesAutor} - {$itemsPerPage} ); iterador++)
                         informacaoAutor[iterador].style.display = 'none';
                     }
                     </script>
@@ -83,7 +83,7 @@
 
                 {translate key="plugins.generic.authorsHistory.pages"} >>
                 {for $paginaAtual=1 to $paginas}
-                    <button class="pageButtons" onclick="showSubmissionsPage({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button">
+                    <button class="pageButtons" onclick="showSubmissionsPage({$itemsPerPage},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button">
                     {$paginaAtual}
                     </button>
                 {/for} 

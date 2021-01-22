@@ -27,24 +27,24 @@ class AuthorsHistoryPlugin extends GenericPlugin {
         
         return $success;
     }
-
-    private function obterDadosAutores($submission){
-        $listaDadosAutores = array();
-        $contatoCorrespondencia = $submission->getCurrentPublication()->getData('primaryContactId');
+    
+    private function getAuthorsData($submission){
+        $listAuthorsData = array();
+        $contactCorrespondence = $submission->getCurrentPublication()->getData('primaryContactId');
 
         foreach ($submission->getAuthors() as $author) {
             $authorData = array();
-            $authorData['nome'] = $author->getFullName();
+            $authorData['name'] = $author->getFullName();
             $authorData['orcid'] = $author->getOrcid();
             $authorData['email'] = $author->getEmail();
-            $authorData['autorCorrespondente'] = ($contatoCorrespondencia == $author->getId());
+            $authorData['correspondingAuthor'] = ($contactCorrespondence == $author->getId());
 
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($authorData['orcid'], $authorData['email']);
 
-            $listaDadosAutores[] = $authorData;
+            $listAuthorsData[] = $authorData;
         }
-        return $listaDadosAutores;
+        return $listAuthorsData;
     }
 
     function addToWorkflow($hookName, $params) {
@@ -59,8 +59,8 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
         );
-        $smarty->assign('listaDadosAutores', $this->obterDadosAutores($submission));
-        $smarty->assign('itensPorPagina', $request->getContext()->getData('itemsPerPage') );
+        $smarty->assign('listDataAuthors', $this->getAuthorsData($submission));
+        $smarty->assign('itemsPerPage', $request->getContext()->getData('itemsPerPage') );
         
         $output .= sprintf(
 			'<tab id="authorsHistory" label="%s">%s</tab>',
