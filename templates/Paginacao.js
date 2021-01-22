@@ -21,7 +21,7 @@ function submissoesRestante(submissoes,intervaloInicial,IntervaloFinal,totalSubm
     return submissoesRestante;
 }
 
-function indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina){
+function intervaloSubmissoesAtuais(paginaAtual,totalSubmissoes,itensPorPagina){
     limiteInferior = totalSubmissoes - ( paginaAtual*itensPorPagina );
     limiteSuperior = limiteInferior + itensPorPagina;
     
@@ -31,7 +31,7 @@ function indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina){
     return [limiteInferior, limiteSuperior];        
 }
 
-function indexarAntigoAtual(paginaAtual,itensPorPagina){
+function intervaloSubmissoesAntigas(paginaAtual,itensPorPagina){
     limiteInferior = (paginaAtual - 1) * itensPorPagina;
     limiteSuperior = limiteInferior + itensPorPagina;
 
@@ -44,8 +44,8 @@ function indexadorSubmissoes(itensPorPagina, paginaAtual,totalSubmissoes,autorAt
     var submissoesPagina = [];
     var demaisSubmissoes = [];
 
-    var inicio = indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina)[0];
-    var fim = indexarAtualAntigo(paginaAtual,totalSubmissoes,itensPorPagina)[1];
+    var inicio = intervaloSubmissoesAtuais(paginaAtual,totalSubmissoes,itensPorPagina)[0];
+    var fim = intervaloSubmissoesAtuais(paginaAtual,totalSubmissoes,itensPorPagina)[1];
 
    submissoesPagina = submissoesDestaque(informacaoAutor,inicio,fim,totalSubmissoes);
    demaisSubmissoes = submissoesRestante(informacaoAutor,inicio,fim,totalSubmissoes);

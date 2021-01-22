@@ -83,7 +83,9 @@
 
                 {translate key="plugins.generic.authorsHistory.pages"} >>
                 {for $paginaAtual=1 to $paginas}
-                    <button class="botoesPagina" onclick="indexadorSubmissoes({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button"> {$paginaAtual} </button>
+                    <button class="botoesPagina" onclick="indexadorSubmissoes({$itensPorPagina},{$paginaAtual},{$submissoesAutor},{$autorAtual})" type="button">
+                    {$paginaAtual}
+                    </button>
                 {/for} 
 
             </div>
