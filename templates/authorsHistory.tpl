@@ -14,7 +14,7 @@
     </div>
     <div id="historyBody">
         {foreach from=$listDataAuthors item=authorData}
-            <div class="historyAuthor">
+            <div class="authorHistory">
                 <h3>{$authorData['name']}</h3>
                 {if $authorData['correspondingAuthor']}
                     <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
@@ -38,11 +38,11 @@
                 {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
         
                     {foreach from=$authorData['submissions'] item=sub}
-                            <div class="publicationAuthor">
-                                <div class="idSubmission">
+                            <div class="authorPublication">
+                                <div class="submissionId">
                                     <span>{$sub->getId()}</span>
                                 </div>
-                                <div class="titleSubmission">
+                                <div class="submissionTitle">
                                     {if $userIsManager}
                                         <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
                                             {$sub->getCurrentPublication()->getLocalizedFullTitle()}
@@ -68,7 +68,7 @@
 
                     <script>
                     var authors = document.getElementsByClassName("authorPublications")[{$currentAuthor}];
-                    var authorInformation = authors.getElementsByClassName("publicationAuthor");
+                    var authorInformation = authors.getElementsByClassName("authorPublication");
 
                     if({$itemsPerPage} < {$totalAuthorSubmissions}){
                         for(iterator= 0; iterator < ( {$totalAuthorSubmissions} - {$itemsPerPage} ); iterator++)

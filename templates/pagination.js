@@ -8,16 +8,16 @@ function featuredSubmissions(submissions,inferiorLimit,upperLimit,totalSubmissio
         return pageSubmissions;
 }
 
-function remainingSubmissions(submissoes,inferiorLimit,upperLimit,totalSubmissions){
+function remainingSubmissions(submissions,inferiorLimit,upperLimit,totalSubmissions){
     var remainingSubmissionsList = [];
 
     for(var iterator = 0; iterator < totalSubmissions; iterator++){
         
         if(iterator < inferiorLimit)
-            remainingSubmissionsList.push(submissoes[iterator]);
+            remainingSubmissionsList.push(submissions[iterator]);
         
         if(iterator >= upperLimit)
-            remainingSubmissionsList.push(submissoes[iterator]);
+            remainingSubmissionsList.push(submissions[iterator]);
     }
 
     return remainingSubmissionsList;
@@ -42,7 +42,7 @@ function oldSubmissionsRange(currentPage,itemsPerPage){
 
 function showSubmissionsPage(itemsPerPage,currentPage,totalSubmissions,currentAuthor){
     var authors = document.getElementsByClassName("authorPublications")[currentAuthor-1];
-    var authorInformation = authors.getElementsByClassName("publicationAuthor");
+    var authorInformation = authors.getElementsByClassName("authorPublication");
     var pageSubmissions = [];
     var otherSubmissions = [];
 

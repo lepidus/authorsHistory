@@ -3,7 +3,7 @@
     margin-bottom: 18px;
 }
 
-.historyAuthor {
+.authorHistory {
     margin-bottom: 18px;
     background-color: #DCDCDC;
     padding: 8px;
@@ -12,12 +12,12 @@
     position: relative;
 }
 
-.historyAuthor h3 {
+.authorHistory h3 {
     margin-left: 10px;
     margin-bottom: 10px;
 }
 
-.historyAuthor span, .historyAuthor a {
+.authorHistory span, .authorHistory a {
     margin-left: 18px;
 }
 
@@ -28,22 +28,22 @@
     padding: 8px;
 }
 
-.publicationAuthor {
+.authorPublication {
     display: flex;
     align-items: center;
     padding: 4px;
 }
 
-.publicationAuthor:not(:first-child) {
+.authorPublication:not(:first-child) {
     border-top: 1px solid #DCDCDC;
 }
 
-.idSubmission {
+.submissionId {
     width: 5%;
     text-align: center;
 }
 
-.titleSubmission {
+.submissionTitle {
     width: 80%;
     text-align: justify;
     line-height: 1.5em;
@@ -61,7 +61,7 @@
     margin: 0px;
 }
 
-.titleSubmission span {
+.submissionTitle span {
     margin: 0px;
 }
 
