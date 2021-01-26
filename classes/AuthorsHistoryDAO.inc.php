@@ -14,19 +14,19 @@ import('lib.pkp.classes.db.DAO');
 class AuthorsHistoryDAO extends DAO {
     
     private function getAuthorsByORCID($orcid) {
-        $resultAuthors = $this->retrieve(
+        $authorsResult = $this->retrieve(
             "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = '{$orcid}'"
         );
-        $authors = (new DAOResultFactory($resultAuthors, $this, '_authorFromRow'))->toArray();
+        $authors = (new DAOResultFactory($authorsResult, $this, '_authorFromRow'))->toArray();
 
         return $authors;
     }
 
     private function getAuthorsByEmail($email) {
-        $resultAuthors = $this->retrieve(
+        $authorsResult = $this->retrieve(
             "SELECT author_id FROM authors WHERE email = '{$email}'"
         );
-        $authors = (new DAOResultFactory($resultAuthors, $this, '_authorFromRow'))->toArray();
+        $authors = (new DAOResultFactory($authorsResult, $this, '_authorFromRow'))->toArray();
         
         return $authors;
     }
