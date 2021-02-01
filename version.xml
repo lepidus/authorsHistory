@@ -6,7 +6,7 @@
   * Plugin version information.
   -->
 <version>
-	<application>AuthorsHistory</application>
+	<application>authorsHistory</application>
 	<type>plugins.generic</type>
 	<release>1.0.2</release>
 	<date>08-10-2020</date>
