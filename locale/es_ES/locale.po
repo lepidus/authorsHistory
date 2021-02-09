@@ -1,0 +1,27 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-07-29T11:05:18+00:00\n"
+"PO-Revision-Date: 2020-07-29T11:05:18+00:00\n"
+"Language: Español\n"
+
+msgid "plugins.generic.authorsHistory.displayName"
+msgstr "Historia de los autores"
+
+msgid "plugins.generic.authorsHistory.description"
+msgstr "Este plugin agrega una pestaña en la vista de lo preprint, donde se enumeran todos los envíos de los contribuyentes"
+
+msgid "plugins.generic.authorsHistory.pages"
+msgstr "Pagina(s)"
+
+msgid "plugins.generic.authorsHistory.noORCID"
+msgstr "No se informó ORCID"
+
+msgid "plugins.generic.authorsHistory.noPublications"
+msgstr "No se encontraron envíos con este ORCID o e-mail"
