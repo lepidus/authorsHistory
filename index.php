@@ -3,7 +3,7 @@
  * @defgroup plugins_generic_authorsHistory
  */
 /**
- * @file plugins/generic/AuthorsHistory/index.php
+ * @file plugins/generic/authorsHistory/index.php
  *
  * @ingroup plugins_generic_authorsHistory
  * @brief Wrapper for the Authors History Plugin.

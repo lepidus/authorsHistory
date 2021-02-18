@@ -4,8 +4,8 @@
  * Template for display the list of submissions of an author
  *}
 
-<link rel="stylesheet" type="text/css" href="/plugins/generic/AuthorsHistory/styles/authorsHistory.css">
-<script type="text/javascript" src="/plugins/generic/AuthorsHistory/templates/pagination.js"></script>
+<link rel="stylesheet" type="text/css" href="/plugins/generic/authorsHistory/styles/authorsHistory.css">
+<script type="text/javascript" src="/plugins/generic/authorsHistory/templates/pagination.js"></script>
 
 {$currentAuthor = 0}
 <div id="authorsHistory">

@@ -1,7 +1,7 @@
 <?php
 
 /**
- * @file plugins/generic/AuthorsHistory/classes/AuthorsHistoryDAO.inc.php
+ * @file plugins/generic/authorsHistory/classes/AuthorsHistoryDAO.inc.php
  *
  * @class AuthorsHistoryDAO
  * @ingroup plugins_generic_authorsHistory
