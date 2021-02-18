@@ -1,0 +1,27 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2020-07-29T11:05:18+00:00\n"
+"PO-Revision-Date: 2020-07-29T11:05:18+00:00\n"
+"Language: Português Brasileiro\n"
+
+msgid "plugins.generic.authorsHistory.displayName"
+msgstr "Histórico dos autores"
+
+msgid "plugins.generic.authorsHistory.description"
+msgstr "Este plugin adiciona uma aba na visualização do preprint, onde são listadas todas as submissões dos contribuidores"
+
+msgid "plugins.generic.authorsHistory.pages"
+msgstr "Página(s)"
+
+msgid "plugins.generic.authorsHistory.noORCID"
+msgstr "Sem ORCID informado"
+
+msgid "plugins.generic.authorsHistory.noPublications"
+msgstr "Nenhuma submissão foi encontrada com este ORCID ou e-mail"
