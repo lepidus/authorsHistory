@@ -8,7 +8,7 @@
  * @brief Plugin class for the Authors History plugin.
  */
 import('lib.pkp.classes.plugins.GenericPlugin');
-import('plugins.generic.AuthorsHistory.classes.AuthorsHistoryDAO');
+import('plugins.generic.authorsHistory.classes.AuthorsHistoryDAO');
 
 
 class AuthorsHistoryPlugin extends GenericPlugin {
