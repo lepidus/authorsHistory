@@ -1,7 +1,11 @@
 {**
  * plugins/generic/AuthorsHistory/templates/authorsHistory.tpl
  *
- * Template for display the list of submissions of an author
+ * Copyright (c) 2020-2021 Lepidus Tecnologia
+ * Copyright (c) 2020-2021 SciELO
+ * Distributed under the GNU GPL v3. For full terms see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt
+ * 
+ * @brief Template for display the list of submissions of an author
  *}
 
 <link rel="stylesheet" type="text/css" href="/plugins/generic/authorsHistory/styles/authorsHistory.css">

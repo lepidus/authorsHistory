@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE version SYSTEM "../../../lib/pkp/dtd/pluginVersion.dtd">
 <!--
-  * plugins/generic/AuthorsHistory/version.xml
+  * @file plugins/generic/AuthorsHistory/version.xml
   *
-  * Plugin version information.
+  * Copyright (c) 2020-2021 Lepidus Tecnologia
+  * Copyright (c) 2020-2021 SciELO
+  * Distributed under the GNU GPL v3. For full terms see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt
+  * 
+  * @brief Plugin version information.
   -->
 <version>
 	<application>authorsHistory</application>
