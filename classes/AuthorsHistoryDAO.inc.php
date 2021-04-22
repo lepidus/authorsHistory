@@ -18,7 +18,8 @@ class AuthorsHistoryDAO extends DAO {
     
     private function getAuthorsByORCID($orcid) {
         $authorsResult = $this->retrieve(
-            "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = '{$orcid}'"
+            "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = ?",
+            [$orcid]
         );
         $authors = (new DAOResultFactory($authorsResult, $this, '_authorFromRow'))->toArray();
 
@@ -27,7 +28,8 @@ class AuthorsHistoryDAO extends DAO {
 
     private function getAuthorsByEmail($email) {
         $authorsResult = $this->retrieve(
-            "SELECT author_id FROM authors WHERE email = '{$email}'"
+            "SELECT author_id FROM authors WHERE email = ?",
+            [$email]
         );
         $authors = (new DAOResultFactory($authorsResult, $this, '_authorFromRow'))->toArray();
         

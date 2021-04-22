@@ -1,6 +1,10 @@
 # Authors History Plugin 
 
-This plugin adds a tab in the preprint view, where all submissions from related contributors are listed.
+This plugin adds a tab in the submission view, where all submissions from each contributor are listed. It's useful so that editors/moderators can quickly see which other works the contributors are involved.
+
+#### Screenshot of the history feature:
+
+![Feature screenshot](/images/feature_screenshot.png)
 
 ## Compatibility
 
