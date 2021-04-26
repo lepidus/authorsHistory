@@ -19,18 +19,18 @@
     <div id="historyBody">
         {foreach from=$listDataAuthors item=authorData}
             <div class="authorHistory">
-                <h3>{$authorData['name']}</h3>
+                <h3>{$authorData['name']|escape}</h3>
                 {if $authorData['correspondingAuthor']}
                     <span>{translate key="submission.submit.selectPrincipalContact"}</span><br>
                 {/if}
                 {if $authorData['orcid']}
-                    <a href="{$authorData['orcid']}" target="_blank" rel="noopener noreferrer">
-                        <strong>ORCID:</strong> {$authorData['orcid']}
+                    <a href="{$authorData['orcid']|escape}" target="_blank" rel="noopener noreferrer">
+                        <strong>{translate key="plugins.generic.authorsHistory.orcid"}:</strong> {$authorData['orcid']|escape}
                     </a>
                 {else}
                     <span>{translate key="plugins.generic.authorsHistory.noORCID"}</span>
                 {/if}
-                <br><span><strong>E-mail:</strong> {$authorData['email']}</span>
+                <br><span><strong>{translate key="email.email"}:</strong> {$authorData['email']|escape}</span>
 
                 {if empty($authorData['submissions'])}
                     <p class="authorPublications">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
@@ -44,26 +44,26 @@
                     {foreach from=$authorData['submissions'] item=sub}
                             <div class="authorPublication">
                                 <div class="submissionId">
-                                    <span>{$sub->getId()}</span>
+                                    <span>{$sub->getId()|escape}</span>
                                 </div>
                                 <div class="submissionTitle">
                                     {if $userIsManager}
                                         <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
-                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()|escape}
                                         </a>
                                     {else}
                                         <span>
-                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()}
+                                            {$sub->getCurrentPublication()->getLocalizedFullTitle()|escape}
                                         </span>
                                     {/if}
                                 </div>
                                 <div class="submissionStatus">
                                     {if $sub->getStatus() == STATUS_PUBLISHED}
                                         <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
-                                            {translate key="{$sub->getStatusKey()}"}
+                                            {translate key="{$sub->getStatusKey()|escape}"}
                                         </a>
                                     {else}
-                                        <span>{translate key="{$sub->getStatusKey()}"}</span>
+                                        <span>{translate key="{$sub->getStatusKey()|escape}"}</span>
                                     {/if}
                                 </div>
                             </div>

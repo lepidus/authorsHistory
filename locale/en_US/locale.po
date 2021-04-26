@@ -26,3 +26,6 @@ msgstr "No ORCID given"
 
 msgid "plugins.generic.authorsHistory.noPublications"
 msgstr "No submissions were found with this ORCID or e-mail"
+
+msgid "plugins.generic.authorsHistory.orcid"
+msgstr "ORCID"

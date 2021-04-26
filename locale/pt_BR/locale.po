@@ -25,3 +25,6 @@ msgstr "Sem ORCID informado"
 
 msgid "plugins.generic.authorsHistory.noPublications"
 msgstr "Nenhuma submissão foi encontrada com este ORCID ou e-mail"
+
+msgid "plugins.generic.authorsHistory.orcid"
+msgstr "ORCID"

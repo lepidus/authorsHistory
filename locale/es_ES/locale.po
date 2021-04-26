@@ -25,3 +25,6 @@ msgstr "No se informó ORCID"
 
 msgid "plugins.generic.authorsHistory.noPublications"
 msgstr "No se encontraron envíos con este ORCID o e-mail"
+
+msgid "plugins.generic.authorsHistory.orcid"
+msgstr "ORCID"
