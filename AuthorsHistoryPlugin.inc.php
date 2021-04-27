@@ -34,6 +34,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
     private function getAuthorsData($submission){
         $listAuthorsData = array();
         $correspondenceContact = $submission->getCurrentPublication()->getData('primaryContactId');
+        $contextId = $submission->getData('contextId');
 
         foreach ($submission->getAuthors() as $author) {
             $authorData = array();
@@ -43,7 +44,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             $authorData['correspondingAuthor'] = ($correspondenceContact == $author->getId());
 
             $authorsHistoryDAO = new AuthorsHistoryDAO();
-            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($authorData['orcid'], $authorData['email']);
+            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($contextId, $authorData['orcid'], $authorData['email']);
 
             $listAuthorsData[] = $authorData;
         }
