@@ -60,10 +60,10 @@
                                 <div class="submissionStatus">
                                     {if $sub->getStatus() == STATUS_PUBLISHED}
                                         <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
-                                            {translate key="{$sub->getStatusKey()|escape}"}
+                                            {translate key=$sub->getStatusKey()}
                                         </a>
                                     {else}
-                                        <span>{translate key="{$sub->getStatusKey()|escape}"}</span>
+                                        <span>{translate key=$sub->getStatusKey()}</span>
                                     {/if}
                                 </div>
                             </div>
