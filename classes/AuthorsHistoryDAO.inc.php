@@ -46,11 +46,14 @@ class AuthorsHistoryDAO extends DAO {
         $submissions = array();
         foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
-            $authorPublication = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
-            $authorSubmission = DAORegistry::getDAO('SubmissionDAO')->getById($authorPublication->getData('submissionId'));
 
-            if($authorSubmission->getData('contextId') == $contextId && $authorSubmission->getData('dateSubmitted') && !in_array($authorSubmission, $submissions)) {
-                $submissions[] = $authorSubmission;
+            if(!is_null($author)){
+                $authorPublication = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
+                $authorSubmission = DAORegistry::getDAO('SubmissionDAO')->getById($authorPublication->getData('submissionId'));
+    
+                if($authorSubmission->getData('contextId') == $contextId && $authorSubmission->getData('dateSubmitted') && !in_array($authorSubmission, $submissions)) {
+                    $submissions[] = $authorSubmission;
+                }
             }
         }
         
