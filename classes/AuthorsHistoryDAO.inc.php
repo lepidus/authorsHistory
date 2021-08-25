@@ -15,6 +15,8 @@
 import('lib.pkp.classes.db.DAO');
 
 class AuthorsHistoryDAO extends DAO {
+
+    const AUTHORS_ID_LIMIT = 25;
     
     private function getAuthorsByORCID($orcid) {
         $authorsResult = $this->retrieve(
@@ -36,8 +38,25 @@ class AuthorsHistoryDAO extends DAO {
         return $authors;
     }
 
-    public function getAuthorSubmissions($contextId, $orcid, $email) {
-        $authors = $this->getAuthorsByEmail($email);
+
+    public function getAuthorIdByGivenNameAndEmail($givenName, $email) {
+        $authorsResult = $this->retrieve(
+            "SELECT authors.author_id FROM authors
+            INNER JOIN author_settings
+            ON authors.author_id = author_settings.author_id
+            AND author_settings.setting_name = 'givenName' AND author_settings.setting_value = ?
+            WHERE authors.email = ?",
+            [$givenName, $email]
+        );
+        $authors = (new DAOResultFactory($authorsResult, $this, '_authorFromRow'))->toArray();
+
+        return $authors;
+    }
+
+    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName) {
+        $authorsByEmail = $this->getAuthorsByEmail($email);
+        $authors = ( sizeof($authorsByEmail) > self::AUTHORS_ID_LIMIT )? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        
         if($orcid) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
@@ -50,7 +69,7 @@ class AuthorsHistoryDAO extends DAO {
             if(!is_null($author)){
                 $authorPublication = DAORegistry::getDAO('PublicationDAO')->getById($author->getData('publicationId'));
                 $authorSubmission = DAORegistry::getDAO('SubmissionDAO')->getById($authorPublication->getData('submissionId'));
-    
+
                 if($authorSubmission->getData('contextId') == $contextId && $authorSubmission->getData('dateSubmitted') && !in_array($authorSubmission, $submissions)) {
                     $submissions[] = $authorSubmission;
                 }
