@@ -31,7 +31,7 @@ class AuthorsHistoryPlugin extends GenericPlugin {
         return $success;
     }
     
-    private function getAuthorsData($submission){
+    private function getAuthorsData($submission, $itemsPerPageLimit){
         $listAuthorsData = array();
         $correspondenceContact = $submission->getCurrentPublication()->getData('primaryContactId');
         $contextId = $submission->getData('contextId');
@@ -45,7 +45,14 @@ class AuthorsHistoryPlugin extends GenericPlugin {
 
             $givenName = $author->getLocalizedGivenName();
             $authorsHistoryDAO = new AuthorsHistoryDAO();
-            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions($contextId, $authorData['orcid'], $authorData['email'], $givenName);
+            
+            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions(
+                $contextId,
+                $authorData['orcid'],
+                $authorData['email'],
+                $givenName,
+                $itemsPerPageLimit
+            );
 
             $listAuthorsData[] = $authorData;
         }
@@ -64,8 +71,9 @@ class AuthorsHistoryPlugin extends GenericPlugin {
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
         );
-        $smarty->assign('listDataAuthors', $this->getAuthorsData($submission));
-        $smarty->assign('itemsPerPage', $request->getContext()->getData('itemsPerPage') );
+        $itemsPerPage = $request->getContext()->getData('itemsPerPage');
+        $smarty->assign('listDataAuthors', $this->getAuthorsData($submission, $itemsPerPage));
+        $smarty->assign('itemsPerPage', $itemsPerPage);
         
         $output .= sprintf(
 			'<tab id="authorsHistory" label="%s">%s</tab>',

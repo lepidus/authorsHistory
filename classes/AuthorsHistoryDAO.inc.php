@@ -15,8 +15,6 @@
 import('lib.pkp.classes.db.DAO');
 
 class AuthorsHistoryDAO extends DAO {
-
-    const AUTHORS_ID_LIMIT = 25;
     
     private function getAuthorsByORCID($orcid) {
         $authorsResult = $this->retrieve(
@@ -53,9 +51,9 @@ class AuthorsHistoryDAO extends DAO {
         return $authors;
     }
 
-    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName) {
+    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit) {
         $authorsByEmail = $this->getAuthorsByEmail($email);
-        $authors = ( sizeof($authorsByEmail) > self::AUTHORS_ID_LIMIT )? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        $authors = ( sizeof($authorsByEmail) > $itemsPerPageLimit )? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
         
         if($orcid) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
