@@ -12,8 +12,8 @@
 <version>
 	<application>authorsHistory</application>
 	<type>plugins.generic</type>
-	<release>1.0.8.0</release>
-	<date>2021-06-16</date>
+	<release>1.0.9.0</release>
+	<date>2021-09-17</date>
 	<lazy-load>1</lazy-load>
 	<class>AuthorsHistoryPlugin</class>
 </version>
