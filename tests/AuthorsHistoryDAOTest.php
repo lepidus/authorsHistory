@@ -28,16 +28,16 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
     private function createAuthor()
     {
         $authorDao = DAORegistry::getDAO('AuthorDAO');
-        $authorsId = [];
+        $authorId = [];
 
         $author = new Author();
         $author->setGivenName($this->givenName, $this->locale);
 		$author->setFamilyName($this->familyName, $this->locale);
 		$author->setAffiliation($this->affiliation, $this->locale);
 		$author->setEmail($this->email);
-        $authorsId = $authorDao->insertObject($author);
+        $authorId = $authorDao->insertObject($author);
 
-        return $authorsId;
+        return $authorId;
     }
 
     public function testAuthorIdRetrievingByGivenNameAndEmail()
