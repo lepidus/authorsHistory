@@ -1,0 +1,31 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: \n"
+"Report-Msgid-Bugs-To: \n"
+"Last-Translator: Alexander Sapozhnikov\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2022-10-06T14:00:00+00:00\n"
+"PO-Revision-Date: 2022-10-06T14:00:00+00:00\n"
+"Language: Russian\n"
+
+
+msgid "plugins.generic.authorsHistory.displayName"
+msgstr "История авторов"
+
+msgid "plugins.generic.authorsHistory.description"
+msgstr "Этот модуль добавляет вкладку к просмотру статьи, куда выводятся все материалы авторов"
+
+msgid "plugins.generic.authorsHistory.pages"
+msgstr "Страницы"
+
+msgid "plugins.generic.authorsHistory.noORCID"
+msgstr "Не указан ORCID"
+
+msgid "plugins.generic.authorsHistory.noPublications"
+msgstr "Нет материалов с этим ORCID или адресом электронной почты"
+
+msgid "plugins.generic.authorsHistory.orcid"
+msgstr "ORCID"
