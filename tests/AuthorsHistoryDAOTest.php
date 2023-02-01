@@ -31,6 +31,7 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $authorId = [];
 
         $author = new Author();
+        $author->setData('publicationId', 1234);
         $author->setGivenName($this->givenName, $this->locale);
 		$author->setFamilyName($this->familyName, $this->locale);
 		$author->setAffiliation($this->affiliation, $this->locale);
