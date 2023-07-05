@@ -1,10 +1,11 @@
 <?php
+
 import('lib.pkp.tests.DatabaseTestCase');
 import('lib.pkp.classes.services.PKPSchemaService'); // SCHEMA_ constants
 import('classes.article.Author');
 import('plugins.generic.authorsHistory.classes.AuthorsHistoryDAO');
 
-class AuthorsHistoryDAOTest extends DatabaseTestCase 
+class AuthorsHistoryDAOTest extends DatabaseTestCase
 {
     private $givenName = "Yves Saint Laurent";
     private $familyName = "Design";
@@ -33,9 +34,9 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $author = new Author();
         $author->setData('publicationId', 1234);
         $author->setGivenName($this->givenName, $this->locale);
-		$author->setFamilyName($this->familyName, $this->locale);
-		$author->setAffiliation($this->affiliation, $this->locale);
-		$author->setEmail($this->email);
+        $author->setFamilyName($this->familyName, $this->locale);
+        $author->setAffiliation($this->affiliation, $this->locale);
+        $author->setEmail($this->email);
         $authorId = $authorDao->insertObject($author);
 
         return $authorId;
