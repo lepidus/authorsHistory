@@ -95,10 +95,10 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $applicationName = substr(Application::getName(), 0, 3);
 
         if($applicationName == 'ops') {
-            return 'article';
+            return 'preprint';
         }
 
-        return 'preprint';
+        return 'article';
     }
 
     public function getDisplayName()
