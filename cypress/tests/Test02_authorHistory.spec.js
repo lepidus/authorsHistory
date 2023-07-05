@@ -45,7 +45,7 @@ describe('Checks history for an author', function () {
 		cy.get('button.pkpModalConfirmButton').click();
     }
 
-    /*it('Creates new submission for an author', function() {
+    it('Creates new submission for an author', function() {
         cy.login('zwoods', null, 'publicknowledge');
         cy.get('div#myQueue a:contains("New Submission")').click();
         
@@ -57,8 +57,8 @@ describe('Checks history for an author', function () {
         cy.waitJQuery();
 		cy.get('h2:contains("Submission complete")');
 		cy.logout();
-    });*/
-    /*it('Publishes new submission', function() {
+    });
+    it('Publishes new submission', function() {
         cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
         
         if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
@@ -76,7 +76,7 @@ describe('Checks history for an author', function () {
 
         cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
         cy.logout();
-    });*/
+    });
     it('Checks author history on previous submission', function() {
         cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
         cy.get('button[id="publication-button"]').click();
