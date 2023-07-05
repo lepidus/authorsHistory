@@ -15,7 +15,7 @@ msgid "plugins.generic.authorsHistory.displayName"
 msgstr "Historia de los autores"
 
 msgid "plugins.generic.authorsHistory.description"
-msgstr "Este plugin agrega una pestaña en la vista de lo preprint, donde se enumeran todos los envíos de los contribuyentes"
+msgstr "Este plugin agrega una pestaña en la vista de lo envío, donde se enumeran todos los envíos de los contribuyentes"
 
 msgid "plugins.generic.authorsHistory.pages"
 msgstr "Pagina(s)"

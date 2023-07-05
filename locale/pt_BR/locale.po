@@ -15,7 +15,7 @@ msgid "plugins.generic.authorsHistory.displayName"
 msgstr "Histórico dos autores"
 
 msgid "plugins.generic.authorsHistory.description"
-msgstr "Este plugin adiciona uma aba na visualização do preprint, onde são listadas todas as submissões dos contribuidores"
+msgstr "Este plugin adiciona uma aba na visualização da submissão, onde são listadas todas as submissões dos contribuidores"
 
 msgid "plugins.generic.authorsHistory.pages"
 msgstr "Página(s)"

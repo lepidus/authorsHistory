@@ -59,7 +59,7 @@
                                 </div>
                                 <div class="submissionStatus">
                                     {if $sub->getStatus() == STATUS_PUBLISHED}
-                                        <a href="{url page="preprint" op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
+                                        <a href="{url page=$submissionType op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
                                             {translate key=$sub->getStatusKey()}
                                         </a>
                                     {else}
@@ -67,7 +67,6 @@
                                     {/if}
                                 </div>
                             </div>
-                                     
                     {/foreach}
 
                     <script>
