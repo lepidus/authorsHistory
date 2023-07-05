@@ -78,12 +78,22 @@ describe('Checks history for an author', function () {
         cy.logout();
     });
     it('Checks author history on previous submission', function() {
-        cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
+        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+            cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
+        } else {
+            cy.login('dbarnes', null, 'publicknowledge');
+            cy.get('button:contains("Archives")').click();
+            cy.get('span:contains("View Woods")').eq(1).click({force: true});
+        }
         cy.get('button[id="publication-button"]').click();
         cy.get('button[id="authorsHistory-button"]').click();
-
         cy.get('.submissionTitle').contains(submissionData.title);
-        cy.get('a:contains("Published")').first().invoke('removeAttr', 'target').click();
+        
+        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+            cy.get('a:contains("Published")').first().invoke('removeAttr', 'target').click();
+        } else {
+            cy.get('a:contains("Published")').eq(1).invoke('removeAttr', 'target').click();
+        }
 
         cy.get('h1:contains("' + submissionData.title + '")');
     });
