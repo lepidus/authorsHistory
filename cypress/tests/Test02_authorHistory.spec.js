@@ -63,6 +63,7 @@ describe('Checks history for an author', function () {
         
         if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
             cy.recordEditorialDecision('Accept and Skip Review');
+            cy.get('li.ui-state-active a:contains("Copyediting")');
             cy.get('button[id="publication-button"]').click();
             cy.get('div#publication button:contains("Schedule For Publication")').click();
             cy.wait(1000);
