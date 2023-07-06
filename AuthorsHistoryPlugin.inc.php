@@ -77,14 +77,28 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
         );
         $itemsPerPage = $request->getContext()->getData('itemsPerPage');
-        $smarty->assign('listDataAuthors', $this->getAuthorsData($submission, $itemsPerPage));
-        $smarty->assign('itemsPerPage', $itemsPerPage);
+        $smarty->assign([
+            'listDataAuthors' => $this->getAuthorsData($submission, $itemsPerPage),
+            'itemsPerPage', $itemsPerPage,
+            'submissionType' => $this->getSubmissionType()
+        ]);
 
         $output .= sprintf(
             '<tab id="authorsHistory" label="%s">%s</tab>',
             __('plugins.generic.authorsHistory.displayName'),
             $smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))
         );
+    }
+
+    private function getSubmissionType(): string
+    {
+        $applicationName = substr(Application::getName(), 0, 3);
+
+        if($applicationName == 'ops') {
+            return 'preprint';
+        }
+
+        return 'article';
     }
 
     public function getDisplayName()

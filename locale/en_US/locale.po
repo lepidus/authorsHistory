@@ -16,7 +16,7 @@ msgid "plugins.generic.authorsHistory.displayName"
 msgstr "Authors History"
 
 msgid "plugins.generic.authorsHistory.description"
-msgstr "This plugin adds a tab in the preprint view, where all submissions from the contributors are filled"
+msgstr "This plugin adds a tab in the submission view, where all submissions from the contributors are filled"
 
 msgid "plugins.generic.authorsHistory.pages"
 msgstr "Page(s)"
