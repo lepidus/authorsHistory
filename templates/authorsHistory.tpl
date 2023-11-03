@@ -1,8 +1,8 @@
 {**
  * plugins/generic/AuthorsHistory/templates/authorsHistory.tpl
  *
- * Copyright (c) 2020-2021 Lepidus Tecnologia
- * Copyright (c) 2020-2021 SciELO
+ * Copyright (c) 2020-2023 Lepidus Tecnologia
+ * Copyright (c) 2020-2023 SciELO
  * Distributed under the GNU GPL v3. For full terms see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt
  * 
  * @brief Template for display the list of submissions of an author
