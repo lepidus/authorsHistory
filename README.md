@@ -10,8 +10,8 @@ This plugin adds a tab in the submission view, where all submissions from each c
 
 The latest release of this plugin is compatible with the following PKP applications:
 
-* OJS 3.2.1 and 3.3.0
-* OPS 3.2.1 and 3.3.0
+* OJS 3.4.0
+* OPS 3.4.0
 
 
 ## Plugin Download

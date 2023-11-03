@@ -10,9 +10,13 @@
  * @ingroup plugins_generic_authorsHistory
  * @brief Plugin class for the Authors History plugin.
  */
-import('lib.pkp.classes.plugins.GenericPlugin');
-import('plugins.generic.authorsHistory.classes.AuthorsHistoryDAO');
 
+namespace APP\plugins\generic\authorsHistory;
+
+use PKP\plugins\GenericPlugin;
+use APP\core\Application;
+use PKP\db\DAORegistry;
+use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -28,7 +32,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
-            HookRegistry::register('Template::Workflow::Publication', array($this, 'addToWorkflow'));
+            Hook::add('Template::Workflow::Publication', array($this, 'addToWorkflow'));
         }
 
         return $success;
@@ -71,7 +75,6 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $request = Application::get()->getRequest();
         $user = $request->getUser();
 
-        $userService = Services::get('user');
         $smarty->assign(
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
