@@ -65,8 +65,8 @@ class AuthorsHistoryPlugin extends GenericPlugin
 
     public function addToWorkflow($hookName, $params)
     {
-        $smarty =& $params[1];
-        $output =& $params[2];
+        $smarty = &$params[1];
+        $output = &$params[2];
         $submission = $smarty->get_template_vars('submission');
         $request = Application::get()->getRequest();
         $user = $request->getUser();
