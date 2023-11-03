@@ -16,6 +16,7 @@ namespace APP\plugins\generic\authorsHistory;
 use PKP\plugins\GenericPlugin;
 use APP\core\Application;
 use PKP\db\DAORegistry;
+use PKP\plugins\Hook;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryPlugin extends GenericPlugin
@@ -24,8 +25,8 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $success = parent::register($category, $path, $mainContextId);
 
-        if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE')) {
-            return true;
+        if (Application::isUnderMaintenance()) {
+            return $success;
         }
 
         if ($success && $this->getEnabled($mainContextId)) {
@@ -41,10 +42,11 @@ class AuthorsHistoryPlugin extends GenericPlugin
     private function getAuthorsData($submission, $itemsPerPageLimit)
     {
         $listAuthorsData = array();
-        $correspondenceContact = $submission->getCurrentPublication()->getData('primaryContactId');
+        $publication = $submission->getCurrentPublication();
+        $correspondenceContact = $publication->getData('primaryContactId');
         $contextId = $submission->getData('contextId');
 
-        foreach ($submission->getAuthors() as $author) {
+        foreach ($publication->getData('authors') as $author) {
             $authorData = array();
             $authorData['name'] = $author->getFullName();
             $authorData['orcid'] = $author->getOrcid();
@@ -71,7 +73,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $smarty = &$params[1];
         $output = &$params[2];
-        $submission = $smarty->get_template_vars('submission');
+        $submission = $smarty->getTemplateVars('submission');
         $request = Application::get()->getRequest();
         $user = $request->getUser();
 
@@ -113,4 +115,8 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         return __('plugins.generic.authorsHistory.description');
     }
+}
+
+if (!PKP_STRICT_MODE) {
+    class_alias('APP\plugins\generic\authorsHistory\AuthorsHistoryPlugin', '\AuthorsHistoryPlugin');
 }

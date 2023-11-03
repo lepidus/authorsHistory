@@ -22,21 +22,33 @@ class AuthorsHistoryDAO extends DAO
 {
     private function getAuthorsByORCID(string $orcid)
     {
-        $query = DB::table('author_settings')
+        $result = DB::table('author_settings')
             ->select('author_id')
             ->where('setting_name', 'orcid')
-            ->where('setting_value', $orcid);
+            ->where('setting_value', $orcid)
+            ->get();
 
-        return $query->get();
+        $authorsIds = [];
+        foreach ($result as $row) {
+            $authorsIds[] = get_object_vars($row)['author_id'];
+        }
+
+        return $authorsIds;
     }
 
     private function getAuthorsByEmail(string $email)
     {
         $query = DB::table('authors')
             ->select('author_id')
-            ->where('email', $email);
+            ->where('email', $email)
+            ->get();
 
-        return $query->get();
+        $authorsIds = [];
+        foreach ($result as $row) {
+            $authorsIds[] = get_object_vars($row)['author_id'];
+        }
+
+        return $authorsIds;
     }
 
 
@@ -63,7 +75,7 @@ class AuthorsHistoryDAO extends DAO
         }
 
         $submissions = array();
-        foreach ($authors as $autorId) {
+        foreach ($authors as $authorId) {
             $author = Repo::author()->get($authorId);
 
             if (!is_null($author)) {
