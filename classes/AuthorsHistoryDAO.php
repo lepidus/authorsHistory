@@ -54,14 +54,20 @@ class AuthorsHistoryDAO extends DAO
 
     public function getAuthorIdByGivenNameAndEmail($givenName, $email)
     {
-        $query = DB::table('authors')
+        $result = DB::table('authors')
             ->join('author_settings', 'authors.author_id', '=', 'author_settings.author_id')
             ->where('author_settings.setting_name', 'givenName')
             ->where('author_settings.setting_value', $givenName)
             ->where('authors.email', $email)
-            ->select('authors.author_id');
+            ->select('authors.author_id')
+            ->get();
 
-        return $query->get();
+        $authorsIds = [];
+        foreach ($result as $row) {
+            $authorsIds[] = get_object_vars($row)['author_id'];
+        }
+
+        return $authorsIds;
     }
 
     public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
