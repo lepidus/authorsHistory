@@ -1,9 +1,9 @@
 <?php
 
-import('lib.pkp.tests.DatabaseTestCase');
-import('lib.pkp.classes.services.PKPSchemaService'); // SCHEMA_ constants
-import('classes.article.Author');
-import('plugins.generic.authorsHistory.classes.AuthorsHistoryDAO');
+use PKP\tests\DatabaseTestCase;
+use PKP\services\PKPSchemaService; // SCHEMA_ constants
+use APP\author\Author;
+use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryDAOTest extends DatabaseTestCase
 {
