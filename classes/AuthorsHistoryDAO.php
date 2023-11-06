@@ -38,7 +38,7 @@ class AuthorsHistoryDAO extends DAO
 
     private function getAuthorsByEmail(string $email)
     {
-        $query = DB::table('authors')
+        $result = DB::table('authors')
             ->select('author_id')
             ->where('email', $email)
             ->get();
