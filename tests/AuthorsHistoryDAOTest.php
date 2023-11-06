@@ -1,11 +1,12 @@
 <?php
 
 use PKP\tests\DatabaseTestCase;
-use PKP\services\PKPSchemaService; // SCHEMA_ constants
 use APP\facades\Repo;
 use APP\submission\Submission;
 use APP\publication\Publication;
 use APP\author\Author;
+use PKP\db\DAORegistry;
+use APP\journal\JournalDAO;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryDAOTest extends DatabaseTestCase
