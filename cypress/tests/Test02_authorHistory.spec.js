@@ -1,62 +1,36 @@
 describe('Checks history for an author', function () {
-    let submissionData;
+    var submissionData;
     
     before(function() {
         submissionData = {
-            section: 'Articles',
 			title: 'The great gig in the sky',
+            section: 'Articles',
+            sectionId: 1,
 			abstract: 'Money: share it fairly, but dont take a slice of my pie',
 			keywords: [
 				'money'
-			]
+			],
+            files: [
+                {
+                    'file': 'dummy.pdf',
+                    'fileName': 'dummy.pdf',
+                    'mimeType': 'application/pdf',
+                    'genre': Cypress.env('defaultGenre')
+                }
+            ]
         }
     });
 
-    function step1() {
-        if (Cypress.env('contextTitles').en_US == 'Journal of Public Knowledge') {
-			cy.get('select[id="sectionId"],select[id="seriesId"]').select(submissionData.section);
-		}
-        cy.get('input[id^="checklist-"]').click({ multiple: true });
-		cy.get('input[id=privacyConsent]').click();
-		cy.get('button.submitFormButton').click();
-    }
-
-    function step2() {
-        cy.get('#submitStep2Form button.submitFormButton').click();
-    }
-
-    function step3() {
-        cy.get('input[name^="title"]').first().type(submissionData.title, { delay: 0 });
-        cy.get('label').contains('Title').click();
-        cy.get('textarea[id^="abstract-"').then((node) => {
-            cy.setTinyMceContent(node.attr("id"), submissionData.abstract);
-        });
-        cy.get('.section > label:visible').first().click();
-        cy.get('ul[id^="en_US-keywords-"]').then(node => {
-            node.tagit('createTag', submissionData.keywords[0]);
-        });
-
-        cy.get('#submitStep3Form button.submitFormButton').click();
-    }
-
-    function step4() {
-        cy.waitJQuery();
-		cy.get('#submitStep4Form button.submitFormButton').click();
-		cy.get('button.pkpModalConfirmButton').click();
-    }
-
     it('Creates new submission for an author', function() {
         cy.login('zwoods', null, 'publicknowledge');
-        cy.get('div#myQueue a:contains("New Submission")').click();
-        
-        step1();
-        step2();
-        step3();
-        step4();
-
-        cy.waitJQuery();
-		cy.get('h2:contains("Submission complete")');
-		cy.logout();
+        cy.getCsrfToken();
+        cy.window()
+			.then(() => {
+				return cy.createSubmissionWithApi(submissionData, this.csrfToken);
+			})
+			.then(xhr => {
+				return cy.submitSubmissionWithApi(submissionData.id, this.csrfToken);
+			});
     });
     it('Publishes new submission', function() {
         cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
