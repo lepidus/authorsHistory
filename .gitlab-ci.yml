@@ -9,3 +9,7 @@ include:
       - 'templates/groups/ojs_3_4_plugins_unit_tests_model.yml'
       - 'templates/groups/ojs_3_4_plugins_cypress_tests_model.yml'
       - 'templates/groups/ops_3_4_plugins_cypress_tests_model.yml'
+
+.integration_tests_template:
+  before_script:
+    - CYPRESS_baseUrl="http://localhost:8000/"
