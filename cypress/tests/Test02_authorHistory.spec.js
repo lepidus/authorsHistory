@@ -1,6 +1,5 @@
 describe('Checks history for an author', function () {
     var submissionData;
-    let submissionFiles;
     
     before(function() {
         submissionData = {
@@ -8,19 +7,24 @@ describe('Checks history for an author', function () {
             section: 'Articles',
             sectionId: 1,
 			abstract: 'Money: share it fairly, but dont take a slice of my pie',
-			keywords: [
+            author: {
+                givenName: 'Roger',
+                familyName: 'Waters',
+                email: 'roger.waters@pinkfloyd.com',
+                country: 'United Kingdom'
+            },
+            keywords: [
 				'money'
-			]
+			],
+            files: [
+                {
+                    'file': 'dummy.pdf',
+                    'fileName': 'dummy.pdf',
+                    'mimeType': 'application/pdf',
+                    'genre': 'Article Text'
+                }
+            ]
         };
-
-        submissionFiles = [
-            {
-                'file': 'dummy.pdf',
-                'fileName': 'dummy.pdf',
-                'mimeType': 'application/pdf',
-                'genre': 'Article Text'
-            }
-        ]
     });
 
     function uploadSubmissionFiles(files) {
@@ -52,29 +56,41 @@ describe('Checks history for an author', function () {
         });
     }
 
-    function finishSubmission(submissionId) {
-        cy.visit('/index.php/publicknowledge/submission?id=' + submissionId);
+    function beginSubmission() {
+        cy.get('input[name="locale"][value="en"]').click();
+        cy.setTinyMceContent('startSubmission-title-control', submissionData.title);
+        cy.get('input[name="sectionId"][value="1"]').click();
+        cy.get('input[name="submissionRequirements"]').check();
+        cy.get('input[name="privacyConsent"]').check();
+        cy.contains('button', 'Begin Submission').click();
+    }
+
+    function detailsStep() {
+        cy.setTinyMceContent('titleAbstract-abstract-control-en', submissionData.abstract);
+        submissionData.keywords.forEach(keyword => {
+            cy.get('#titleAbstract-keywords-control-en').type(keyword, {delay: 0});
+            cy.get('#titleAbstract-keywords-control-en').type('{enter}', {delay: 0});
+        });
         cy.contains('button', 'Continue').click();
-        uploadSubmissionFiles(submissionFiles);
+    }
+
+    function filesStep() {
+        uploadSubmissionFiles(submissionData.files);
         cy.contains('button', 'Continue').click();
+    }
+
+    it('Creates new submission for an author', function() {
+        cy.login('zwoods', null, 'publicknowledge');
+        cy.get('div#myQueue a:contains("New Submission")').click();
+        
+        beginSubmission();
+        detailsStep();
+        filesStep();
         cy.contains('button', 'Continue').click();
         cy.contains('button', 'Continue').click();
         cy.contains('button', 'Submit').click();
         cy.get('.modal__panel:visible').within(() => {
             cy.contains('button', 'Submit').click();
-        });
-    }
-
-    it('Creates new submission for an author', function() {
-        cy.login('zwoods', null, 'publicknowledge');
-        cy.getCsrfToken();
-        cy.window()
-			.then(() => {
-				return cy.createSubmissionWithApi(submissionData, this.csrfToken);
-			});
-		cy.get('@submissionId').then((submissionId) => {
-            submissionData.id = submissionId;
-            finishSubmission(submissionId);
         });
     });
     it('Publishes new submission', function() {
