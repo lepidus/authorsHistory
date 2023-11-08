@@ -21,7 +21,7 @@ describe('Checks history for an author', function () {
                     'file': 'dummy.pdf',
                     'fileName': 'dummy.pdf',
                     'mimeType': 'application/pdf',
-                    'genre': 'Article Text'
+                    'genre': ((Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server')) ? ('Article Text') : ('Preprint Text')
                 }
             ]
         };
@@ -59,7 +59,11 @@ describe('Checks history for an author', function () {
     function beginSubmission() {
         cy.get('input[name="locale"][value="en"]').click();
         cy.setTinyMceContent('startSubmission-title-control', submissionData.title);
-        cy.get('input[name="sectionId"][value="1"]').click();
+        
+        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+            cy.get('input[name="sectionId"][value="1"]').click();
+        }
+        
         cy.get('input[name="submissionRequirements"]').check();
         cy.get('input[name="privacyConsent"]').check();
         cy.contains('button', 'Begin Submission').click();
@@ -75,7 +79,11 @@ describe('Checks history for an author', function () {
     }
 
     function filesStep() {
-        uploadSubmissionFiles(submissionData.files);
+        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+            uploadSubmissionFiles(submissionData.files);
+        } else  {
+            cy.addSubmissionGalleys(submissionData.files);
+        }
         cy.contains('button', 'Continue').click();
     }
 
@@ -121,11 +129,11 @@ describe('Checks history for an author', function () {
             cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
         } else {
             cy.login('dbarnes', null, 'publicknowledge');
-            cy.get('button:contains("Archives")').click();
+            cy.get('#archive-button').click();
             cy.get('span:contains("View Woods")').eq(1).click({force: true});
         }
-        cy.get('button[id="publication-button"]').click();
-        cy.get('button[id="authorsHistory-button"]').click();
+        cy.get('#publication-button').click();
+        cy.get('#authorsHistory-button').click();
         cy.get('.submissionTitle').contains(submissionData.title);
         
         if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
