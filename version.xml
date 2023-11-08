@@ -3,8 +3,8 @@
 <!--
   * @file plugins/generic/AuthorsHistory/version.xml
   *
-  * Copyright (c) 2020-2021 Lepidus Tecnologia
-  * Copyright (c) 2020-2021 SciELO
+  * Copyright (c) 2020-2023 Lepidus Tecnologia
+  * Copyright (c) 2020-2023 SciELO
   * Distributed under the GNU GPL v3. For full terms see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt
   * 
   * @brief Plugin version information.
@@ -12,8 +12,8 @@
 <version>
 	<application>authorsHistory</application>
 	<type>plugins.generic</type>
-	<release>1.1.1.0</release>
-	<date>2023-07-06</date>
+	<release>2.0.0.0</release>
+	<date>2023-10-08</date>
 	<lazy-load>1</lazy-load>
 	<class>AuthorsHistoryPlugin</class>
 </version>

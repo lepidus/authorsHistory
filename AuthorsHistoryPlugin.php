@@ -2,17 +2,22 @@
 /**
  * @file plugins/generic/AuthorsHistory/AuthorsHistoryPlugin.inc.php
  *
- * Copyright (c) 2020-2021 Lepidus Tecnologia
- * Copyright (c) 2020-2021 SciELO
+ * Copyright (c) 2020-2023 Lepidus Tecnologia
+ * Copyright (c) 2020-2023 SciELO
  * Distributed under the GNU GPL v3. For full terms see LICENSE or https://www.gnu.org/licenses/gpl-3.0.txt
  *
  * @class AuthorsHistoryPlugin
  * @ingroup plugins_generic_authorsHistory
  * @brief Plugin class for the Authors History plugin.
  */
-import('lib.pkp.classes.plugins.GenericPlugin');
-import('plugins.generic.authorsHistory.classes.AuthorsHistoryDAO');
 
+namespace APP\plugins\generic\authorsHistory;
+
+use PKP\plugins\GenericPlugin;
+use APP\core\Application;
+use PKP\db\DAORegistry;
+use PKP\plugins\Hook;
+use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -20,15 +25,15 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $success = parent::register($category, $path, $mainContextId);
 
-        if (!Config::getVar('general', 'installed') || defined('RUNNING_UPGRADE')) {
-            return true;
+        if (Application::isUnderMaintenance()) {
+            return $success;
         }
 
         if ($success && $this->getEnabled($mainContextId)) {
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
-            HookRegistry::register('Template::Workflow::Publication', array($this, 'addToWorkflow'));
+            Hook::add('Template::Workflow::Publication', array($this, 'addToWorkflow'));
         }
 
         return $success;
@@ -37,10 +42,11 @@ class AuthorsHistoryPlugin extends GenericPlugin
     private function getAuthorsData($submission, $itemsPerPageLimit)
     {
         $listAuthorsData = array();
-        $correspondenceContact = $submission->getCurrentPublication()->getData('primaryContactId');
+        $publication = $submission->getCurrentPublication();
+        $correspondenceContact = $publication->getData('primaryContactId');
         $contextId = $submission->getData('contextId');
 
-        foreach ($submission->getAuthors() as $author) {
+        foreach ($publication->getData('authors') as $author) {
             $authorData = array();
             $authorData['name'] = $author->getFullName();
             $authorData['orcid'] = $author->getOrcid();
@@ -65,13 +71,12 @@ class AuthorsHistoryPlugin extends GenericPlugin
 
     public function addToWorkflow($hookName, $params)
     {
-        $smarty =& $params[1];
-        $output =& $params[2];
-        $submission = $smarty->get_template_vars('submission');
+        $smarty = &$params[1];
+        $output = &$params[2];
+        $submission = $smarty->getTemplateVars('submission');
         $request = Application::get()->getRequest();
         $user = $request->getUser();
 
-        $userService = Services::get('user');
         $smarty->assign(
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
@@ -110,4 +115,8 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         return __('plugins.generic.authorsHistory.description');
     }
+}
+
+if (!PKP_STRICT_MODE) {
+    class_alias('APP\plugins\generic\authorsHistory\AuthorsHistoryPlugin', '\AuthorsHistoryPlugin');
 }
