@@ -21,7 +21,7 @@ describe('Checks history for an author', function () {
                     'file': 'dummy.pdf',
                     'fileName': 'dummy.pdf',
                     'mimeType': 'application/pdf',
-                    'genre': ((Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server')) ? ('Article Text') : ('Preprint Text')
+                    'genre': ((Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server')) ? ('Article Text') : ('Preprint Text')
                 }
             ]
         };
@@ -60,7 +60,7 @@ describe('Checks history for an author', function () {
         cy.get('input[name="locale"][value="en"]').click();
         cy.setTinyMceContent('startSubmission-title-control', submissionData.title);
         
-        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('input[name="sectionId"][value="1"]').click();
         }
         
@@ -79,7 +79,7 @@ describe('Checks history for an author', function () {
     }
 
     function filesStep() {
-        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             uploadSubmissionFiles(submissionData.files);
         } else  {
             cy.addSubmissionGalleys(submissionData.files);
@@ -104,7 +104,7 @@ describe('Checks history for an author', function () {
     it('Publishes new submission', function() {
         cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
         
-        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('li a:contains("Accept and Skip Review")').click();
             cy.contains('button', 'Skip this email').click();
             cy.contains('button', 'Record Decision').click();
@@ -125,7 +125,7 @@ describe('Checks history for an author', function () {
         cy.logout();
     });
     it('Checks author history on previous submission', function() {
-        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
         } else {
             cy.login('dbarnes', null, 'publicknowledge');
@@ -136,7 +136,7 @@ describe('Checks history for an author', function () {
         cy.get('#authorsHistory-button').click();
         cy.get('.submissionTitle').contains(submissionData.title);
         
-        if (Cypress.env('contextTitles').en_US !== 'Public Knowledge Preprint Server') {
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('a:contains("Published")').first().invoke('removeAttr', 'target').click();
         } else {
             cy.get('a:contains("Published")').eq(1).invoke('removeAttr', 'target').click();
