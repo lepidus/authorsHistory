@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @defgroup plugins_generic_authorsHistory
  */

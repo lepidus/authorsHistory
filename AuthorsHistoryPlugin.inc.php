@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file plugins/generic/AuthorsHistory/AuthorsHistoryPlugin.inc.php
  *
@@ -41,11 +42,12 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $contextId = $submission->getData('contextId');
 
         foreach ($submission->getAuthors() as $author) {
-            $authorData = array();
-            $authorData['name'] = $author->getFullName();
-            $authorData['orcid'] = $author->getOrcid();
-            $authorData['email'] = $author->getEmail();
-            $authorData['correspondingAuthor'] = ($correspondenceContact == $author->getId());
+            $authorData = [
+                'name' => $author->getFullName(),
+                'orcid' => $author->getOrcid(),
+                'email' => $author->getEmail(),
+                'correspondingAuthor' => ($correspondenceContact == $author->getId()),
+            ];
 
             $givenName = $author->getLocalizedGivenName();
             $authorsHistoryDAO = new AuthorsHistoryDAO();
@@ -71,7 +73,6 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $request = Application::get()->getRequest();
         $user = $request->getUser();
 
-        $userService = Services::get('user');
         $smarty->assign(
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
@@ -94,7 +95,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $applicationName = substr(Application::getName(), 0, 3);
 
-        if($applicationName == 'ops') {
+        if ($applicationName == 'ops') {
             return 'preprint';
         }
 
