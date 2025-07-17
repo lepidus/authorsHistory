@@ -69,7 +69,7 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $author->setEmail($authorData['email'] ?? null);
         $author->setOrcid($authorData['orcid'] ?? null);
 
-        return $authorDao->insertObject($author);
+        return (int) $authorDao->insertObject($author);
     }
 
     public function testRetrieveAuthorsByEmail()
@@ -99,8 +99,35 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }
 
-    // public function testRetrieveSimilarAuthors()
-    // {
+    public function testRetrieveSimilarAuthors()
+    {
+        $authorsHistoryDAO = new AuthorsHistoryDAO();
+        $expectedAuthors = $this->authors;
+        $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthors(
+            $this->testAuthorsData[0]['email'],
+            $this->testAuthorsData[0]['orcid'],
+            $this->testAuthorsData[0]['givenName'],
+            10
+        );
+        $retrievedAuthors = array_values($retrievedAuthors);
+        sort($retrievedAuthors, SORT_NUMERIC);
 
-    // }
+        $this->assertEquals($expectedAuthors, $retrievedAuthors);
+    }
+
+    public function testRetrieveSimilarAuthorsWithNullEmail()
+    {
+        $authorsHistoryDAO = new AuthorsHistoryDAO();
+        $expectedAuthors = [$this->authors[0], $this->authors[1]];
+        $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthors(
+            null,
+            $this->testAuthorsData[0]['orcid'],
+            $this->testAuthorsData[0]['givenName'],
+            10
+        );
+        $retrievedAuthors = array_values($retrievedAuthors);
+        sort($retrievedAuthors, SORT_NUMERIC);
+
+        $this->assertEquals($expectedAuthors, $retrievedAuthors);
+    }
 }

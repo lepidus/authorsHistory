@@ -54,16 +54,26 @@ class AuthorsHistoryDAO extends DAO
         return $authors;
     }
 
-    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    public function getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit)
     {
-        $authorsByEmail = $this->getAuthorsByEmail($email);
-        $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        $authors = [];
 
-        if ($orcid) {
+        if (!empty($email)) {
+            $authorsByEmail = $this->getAuthorsByEmail($email);
+            $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        }
+
+        if (!empty($orcid)) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
         }
 
+        return $authors;
+    }
+
+    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    {
+        $authors = $this->getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit);
         $submissions = array();
         foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
