@@ -1,4 +1,5 @@
 <?php
+
 /**
  * @file plugins/generic/AuthorsHistory/AuthorsHistoryPlugin.inc.php
  *
@@ -47,11 +48,12 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $contextId = $submission->getData('contextId');
 
         foreach ($publication->getData('authors') as $author) {
-            $authorData = array();
-            $authorData['name'] = $author->getFullName();
-            $authorData['orcid'] = $author->getOrcid();
-            $authorData['email'] = $author->getEmail();
-            $authorData['correspondingAuthor'] = ($correspondenceContact == $author->getId());
+            $authorData = [
+                'name' => $author->getFullName(),
+                'orcid' => $author->getOrcid(),
+                'email' => $author->getEmail(),
+                'correspondingAuthor' => ($correspondenceContact == $author->getId()),
+            ];
 
             $givenName = $author->getLocalizedGivenName();
             $authorsHistoryDAO = new AuthorsHistoryDAO();
@@ -99,7 +101,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $applicationName = substr(Application::getName(), 0, 3);
 
-        if($applicationName == 'ops') {
+        if ($applicationName == 'ops') {
             return 'preprint';
         }
 

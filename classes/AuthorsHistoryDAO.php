@@ -20,7 +20,7 @@ use PKP\db\DAO;
 
 class AuthorsHistoryDAO extends DAO
 {
-    private function getAuthorsByORCID(string $orcid)
+    public function getAuthorsByOrcid(string $orcid)
     {
         $result = DB::table('author_settings')
             ->select('author_id')
@@ -36,7 +36,7 @@ class AuthorsHistoryDAO extends DAO
         return $authorsIds;
     }
 
-    private function getAuthorsByEmail(string $email)
+    public function getAuthorsByEmail(string $email)
     {
         $result = DB::table('authors')
             ->select('author_id')
@@ -70,15 +70,26 @@ class AuthorsHistoryDAO extends DAO
         return $authorsIds;
     }
 
-    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    public function getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit)
     {
-        $authorsByEmail = $this->getAuthorsByEmail($email);
-        $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        $authors = [];
 
-        if ($orcid) {
+        if (!empty($email)) {
+            $authorsByEmail = $this->getAuthorsByEmail($email);
+            $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        }
+
+        if (!empty($orcid)) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
         }
+
+        return $authors;
+    }
+
+    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    {
+        $authors = $this->getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit);
 
         $submissions = array();
         foreach ($authors as $authorId) {
