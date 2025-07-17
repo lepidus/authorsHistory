@@ -16,7 +16,7 @@ import('lib.pkp.classes.db.DAO');
 
 class AuthorsHistoryDAO extends DAO
 {
-    private function getAuthorsByORCID($orcid)
+    public function getAuthorsByORCID($orcid)
     {
         $authorsResult = $this->retrieve(
             "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = ?",
@@ -27,7 +27,7 @@ class AuthorsHistoryDAO extends DAO
         return $authors;
     }
 
-    private function getAuthorsByEmail($email)
+    public function getAuthorsByEmail($email)
     {
         $authorsResult = $this->retrieve(
             "SELECT author_id FROM authors WHERE email = ?",
@@ -54,16 +54,26 @@ class AuthorsHistoryDAO extends DAO
         return $authors;
     }
 
-    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    public function getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit)
     {
-        $authorsByEmail = $this->getAuthorsByEmail($email);
-        $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        $authors = [];
 
-        if ($orcid) {
+        if (!empty($email)) {
+            $authorsByEmail = $this->getAuthorsByEmail($email);
+            $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+        }
+
+        if (!empty($orcid)) {
             $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
             $authors = array_unique(array_merge($authors, $authorsFromOrcid));
         }
 
+        return $authors;
+    }
+
+    public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
+    {
+        $authors = $this->getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit);
         $submissions = array();
         foreach ($authors as $autorId) {
             $author = DAOregistry::getDAO('AuthorDAO')->getById($autorId);
