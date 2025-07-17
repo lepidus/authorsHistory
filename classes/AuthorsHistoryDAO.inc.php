@@ -16,7 +16,7 @@ import('lib.pkp.classes.db.DAO');
 
 class AuthorsHistoryDAO extends DAO
 {
-    private function getAuthorsByORCID($orcid)
+    public function getAuthorsByORCID($orcid)
     {
         $authorsResult = $this->retrieve(
             "SELECT author_id FROM author_settings WHERE setting_name = 'orcid' AND setting_value = ?",
@@ -27,7 +27,7 @@ class AuthorsHistoryDAO extends DAO
         return $authors;
     }
 
-    private function getAuthorsByEmail($email)
+    public function getAuthorsByEmail($email)
     {
         $authorsResult = $this->retrieve(
             "SELECT author_id FROM authors WHERE email = ?",
