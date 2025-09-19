@@ -1,3 +1,5 @@
+import '../support/commands.js';
+
 describe('Checks history for an author', function () {
     var submissionData;
     
@@ -102,7 +104,8 @@ describe('Checks history for an author', function () {
         });
     });
     it('Publishes new submission', function() {
-        cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
+        cy.login('dbarnes', null, 'publicknowledge');
+        cy.findSubmission('myQueue', submissionData.title);
         
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('li a:contains("Accept and Skip Review")').click();
@@ -125,13 +128,9 @@ describe('Checks history for an author', function () {
         cy.logout();
     });
     it('Checks author history on previous submission', function() {
-        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
-        } else {
-            cy.login('dbarnes', null, 'publicknowledge');
-            cy.get('#archive-button').click();
-            cy.get('span:contains("View Woods")').eq(1).click({force: true});
-        }
+        cy.login('dbarnes', null, 'publicknowledge');
+        cy.findSubmission('archive', submissionData.title);
+
         cy.get('#publication-button').click();
         cy.get('#authorsHistory-button').click();
         cy.get('.submissionTitle').contains(submissionData.title);
