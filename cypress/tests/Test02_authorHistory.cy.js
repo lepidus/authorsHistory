@@ -159,7 +159,7 @@ describe('Checks history for an author', function () {
 
         cy.get('.pkpPublication__version:contains("2")');
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.get('div#publication button:contains("Schedule For Publication")').click();
+            cy.get('div#publication button:contains("Publish")').click();
         } else {
 			cy.get('div#publication button:contains("Post")').click();
 		}
