@@ -105,7 +105,7 @@ describe('Checks history for an author', function () {
     });
     it('Publishes new submission', function() {
         cy.login('dbarnes', null, 'publicknowledge');
-        cy.findSubmission('myQueue', submissionData.title);
+        cy.findSubmission('active', submissionData.title);
         
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('li a:contains("Accept and Skip Review")').click();
