@@ -13,3 +13,7 @@ include:
 ojs_integration_tests:
   rules:
     - when: never
+
+ops_integration_tests:
+  rules:
+    - when: never
