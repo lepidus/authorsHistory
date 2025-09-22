@@ -1,5 +1,8 @@
+import '../support/commands.js';
+
 describe('Checks history for an author', function () {
-    var submissionData;
+    let submissionData;
+    let previousAuthorSubmission = 'Finocchiaro: Arguments About Arguments';
     
     before(function() {
         submissionData = {
@@ -102,7 +105,8 @@ describe('Checks history for an author', function () {
         });
     });
     it('Publishes new submission', function() {
-        cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
+        cy.login('dbarnes', null, 'publicknowledge');
+        cy.findSubmission('active', submissionData.title);
         
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.get('li a:contains("Accept and Skip Review")').click();
@@ -125,13 +129,13 @@ describe('Checks history for an author', function () {
         cy.logout();
     });
     it('Checks author history on previous submission', function() {
+        cy.login('dbarnes', null, 'publicknowledge');
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.findSubmissionAsEditor('dbarnes', null, 'Woods');
+            cy.findSubmission('active', previousAuthorSubmission);
         } else {
-            cy.login('dbarnes', null, 'publicknowledge');
-            cy.get('#archive-button').click();
-            cy.get('span:contains("View Woods")').eq(1).click({force: true});
+            cy.findSubmission('archive', previousAuthorSubmission);
         }
+
         cy.get('#publication-button').click();
         cy.get('#authorsHistory-button').click();
         cy.get('.submissionTitle').contains(submissionData.title);
@@ -143,5 +147,32 @@ describe('Checks history for an author', function () {
         }
 
         cy.get('h1:contains("' + submissionData.title + '")');
+    });
+    it('Submission with new versions do not appear multiple times on history', function() {
+        cy.login('dbarnes', null, 'publicknowledge');
+        cy.findSubmission('archive', submissionData.title);
+
+        cy.get('#publication-button').click();
+        cy.contains('button', 'Create New Version').click();
+        cy.get('.modal__panel button:contains("Yes")').click();
+        cy.wait(2000);
+
+        cy.get('.pkpPublication__version:contains("2")');
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
+            cy.get('div#publication button:contains("Publish")').click();
+        } else {
+			cy.get('div#publication button:contains("Post")').click();
+		}
+        cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
+
+        cy.contains('.app__navItem', 'Submissions').click();
+        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
+            cy.findSubmission('active', previousAuthorSubmission);
+        } else {
+            cy.findSubmission('archive', previousAuthorSubmission);
+        }
+        cy.get('#publication-button').click();
+        cy.get('#authorsHistory-button').click();
+        cy.get('a:contains("' + submissionData.title + '")').should('have.length', 1);
     });
 });

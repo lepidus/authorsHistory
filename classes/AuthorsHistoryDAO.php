@@ -91,7 +91,7 @@ class AuthorsHistoryDAO extends DAO
     {
         $authors = $this->getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit);
 
-        $submissions = array();
+        $submissions = [];
         foreach ($authors as $authorId) {
             $author = Repo::author()->get($authorId);
 
@@ -99,8 +99,12 @@ class AuthorsHistoryDAO extends DAO
                 $authorPublication = Repo::publication()->get($author->getData('publicationId'));
                 $authorSubmission = Repo::submission()->get($authorPublication->getData('submissionId'));
 
-                if ($authorSubmission->getData('contextId') == $contextId && $authorSubmission->getData('dateSubmitted') && !in_array($authorSubmission, $submissions)) {
-                    $submissions[] = $authorSubmission;
+                if (
+                    $authorSubmission->getData('contextId') == $contextId
+                    && $authorSubmission->getData('dateSubmitted')
+                    && !array_key_exists($authorSubmission->getId(), $submissions)
+                ) {
+                    $submissions[$authorSubmission->getId()] = $authorSubmission;
                 }
             }
         }

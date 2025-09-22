@@ -34,7 +34,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
-            Hook::add('Template::Workflow::Publication', array($this, 'addToWorkflow'));
+            Hook::add('Template::Workflow::Publication', [$this, 'addToWorkflow']);
         }
 
         return $success;
