@@ -20,32 +20,9 @@ use PKP\db\DAO;
 
 class AuthorsHistoryDAO extends DAO
 {
-    public function getAuthorsByOrcid(string $orcid)
+    private function executeQuery($query)
     {
-        $result = DB::table('author_settings')
-            ->select('author_id')
-            ->where('setting_name', 'orcid')
-            ->where('setting_value', $orcid)
-            ->get();
-
-        $authorsIds = [];
-        foreach ($result as $row) {
-            $authorsIds[] = get_object_vars($row)['author_id'];
-        }
-
-        return $authorsIds;
-    }
-
-    public function getSimilarAuthorsByEmail(string $email, int $contextId)
-    {
-        $result = DB::table('authors AS a')
-            ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
-            ->leftJoin('submissions AS s', 'p.submission_id', '=', 's.submission_id')
-            ->where('a.email', $email)
-            ->where('s.context_id', $contextId)
-            ->where('s.submission_progress', '=', '')
-            ->select('a.author_id', 's.submission_id', 'p.publication_id')
-            ->get();
+        $result = $query->get();
 
         $similarAuthors = [];
         foreach ($result as $row) {
@@ -55,23 +32,48 @@ class AuthorsHistoryDAO extends DAO
         return $similarAuthors;
     }
 
-
-    public function getAuthorIdByGivenNameAndEmail($givenName, $email)
+    public function getSimilarAuthorsByOrcid(string $orcid)
     {
-        $result = DB::table('authors')
-            ->leftJoin('author_settings', 'authors.author_id', '=', 'author_settings.author_id')
-            ->where('author_settings.setting_name', 'givenName')
-            ->where('author_settings.setting_value', $givenName)
-            ->where('authors.email', $email)
-            ->select('authors.author_id')
-            ->get();
+        $query = DB::table('author_settings AS ast')
+            ->leftJoin('authors AS a', 'ast.author_id', '=', 'a.author_id')
+            ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
+            ->leftJoin('submissions AS s', 'p.submission_id', '=', 's.submission_id')
+            ->where('ast.setting_name', 'orcid')
+            ->where('ast.setting_value', $orcid)
+            ->where('s.context_id', $contextId)
+            ->where('s.submission_progress', '=', '')
+            ->select('a.author_id', 's.submission_id');
 
-        $authorsIds = [];
-        foreach ($result as $row) {
-            $authorsIds[] = get_object_vars($row)['author_id'];
-        }
+        return $this->executeQuery($query);
+    }
 
-        return $authorsIds;
+    public function getSimilarAuthorsByEmailQuery(string $email, int $contextId)
+    {
+        $query = DB::table('authors AS a')
+            ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
+            ->leftJoin('submissions AS s', 'p.submission_id', '=', 's.submission_id')
+            ->where('a.email', $email)
+            ->where('s.context_id', $contextId)
+            ->where('s.submission_progress', '=', '')
+            ->select('a.author_id', 's.submission_id');
+
+        return $query;
+    }
+
+    public function getSimilarAuthorsByGivenNameAndEmail($givenName, $email)
+    {
+        $query = DB::table('authors AS a')
+            ->leftJoin('author_settings AS ast', 'a.author_id', '=', 'ast.author_id')
+            ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
+            ->leftJoin('submissions AS s', 'p.submission_id', '=', 's.submission_id')
+            ->where('ast.setting_name', 'givenName')
+            ->where('ast.setting_value', $givenName)
+            ->where('a.email', $email)
+            ->where('s.context_id', $contextId)
+            ->where('s.submission_progress', '=', '')
+            ->select('a.author_id', 's.submission_id');
+
+        return $this->executeQuery($query);
     }
 
     public function getSimilarAuthors($contextId, $email, $orcid, $givenName, $itemsPerPageLimit)
@@ -79,14 +81,16 @@ class AuthorsHistoryDAO extends DAO
         $authors = [];
 
         if (!empty($email)) {
-            $similarAuthorsByEmail = $this->getSimilarAuthorsByEmail($email, $contextId);
-            $authors = (sizeof($similarAuthorsByEmail) > 10000000) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $similarAuthorsByEmail;
+            $authorsByEmailQuery = $this->getSimilarAuthorsByEmailQuery($email, $contextId);
+            $authors = ($authorsByEmailQuery->count() > $itemsPerPageLimit)
+                ? $this->getSimilarAuthorsByGivenNameAndEmail($givenName, $email)
+                : $this->executeQuery($authorsByEmailQuery);
         }
 
-        // if (!empty($orcid)) {
-        //     $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
-        //     $authors = array_unique(array_merge($authors, $authorsFromOrcid));
-        // }
+        if (!empty($orcid)) {
+            $authorsFromOrcid = $this->getSimilarAuthorsByOrcid($orcid);
+            $authors = array_unique(array_merge($authors, $authorsFromOrcid));
+        }
 
         return $authors;
     }
@@ -99,7 +103,7 @@ class AuthorsHistoryDAO extends DAO
         foreach ($similarAuthors as $authorData) {
             $submissionId = $authorData['submission_id'];
             $author = Repo::author()->get($authorData['author_id']);
-            
+
             if (!array_key_exists($submissionId, $submissions)) {
                 $authorSubmission = Repo::submission()->get($submissionId);
                 $submissions[$submissionId] = $authorSubmission;
