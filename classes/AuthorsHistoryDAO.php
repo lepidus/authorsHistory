@@ -36,26 +36,30 @@ class AuthorsHistoryDAO extends DAO
         return $authorsIds;
     }
 
-    public function getAuthorsByEmail(string $email)
+    public function getSimilarAuthorsByEmail(string $email, int $contextId)
     {
-        $result = DB::table('authors')
-            ->select('author_id')
-            ->where('email', $email)
+        $result = DB::table('authors AS a')
+            ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
+            ->leftJoin('submissions AS s', 'p.submission_id', '=', 's.submission_id')
+            ->where('a.email', $email)
+            ->where('s.context_id', $contextId)
+            ->where('s.submission_progress', '=', '')
+            ->select('a.author_id', 's.submission_id', 'p.publication_id')
             ->get();
 
-        $authorsIds = [];
+        $similarAuthors = [];
         foreach ($result as $row) {
-            $authorsIds[] = get_object_vars($row)['author_id'];
+            $similarAuthors[] = get_object_vars($row);
         }
 
-        return $authorsIds;
+        return $similarAuthors;
     }
 
 
     public function getAuthorIdByGivenNameAndEmail($givenName, $email)
     {
         $result = DB::table('authors')
-            ->join('author_settings', 'authors.author_id', '=', 'author_settings.author_id')
+            ->leftJoin('author_settings', 'authors.author_id', '=', 'author_settings.author_id')
             ->where('author_settings.setting_name', 'givenName')
             ->where('author_settings.setting_value', $givenName)
             ->where('authors.email', $email)
@@ -70,42 +74,35 @@ class AuthorsHistoryDAO extends DAO
         return $authorsIds;
     }
 
-    public function getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit)
+    public function getSimilarAuthors($contextId, $email, $orcid, $givenName, $itemsPerPageLimit)
     {
         $authors = [];
 
         if (!empty($email)) {
-            $authorsByEmail = $this->getAuthorsByEmail($email);
-            $authors = (sizeof($authorsByEmail) > $itemsPerPageLimit) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $authorsByEmail;
+            $similarAuthorsByEmail = $this->getSimilarAuthorsByEmail($email, $contextId);
+            $authors = (sizeof($similarAuthorsByEmail) > 10000000) ? $this->getAuthorIdByGivenNameAndEmail($givenName, $email) : $similarAuthorsByEmail;
         }
 
-        if (!empty($orcid)) {
-            $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
-            $authors = array_unique(array_merge($authors, $authorsFromOrcid));
-        }
+        // if (!empty($orcid)) {
+        //     $authorsFromOrcid = $this->getAuthorsByORCID($orcid);
+        //     $authors = array_unique(array_merge($authors, $authorsFromOrcid));
+        // }
 
         return $authors;
     }
 
     public function getAuthorSubmissions($contextId, $orcid, $email, $givenName, $itemsPerPageLimit)
     {
-        $authors = $this->getSimilarAuthors($email, $orcid, $givenName, $itemsPerPageLimit);
+        $similarAuthors = $this->getSimilarAuthors($contextId, $email, $orcid, $givenName, $itemsPerPageLimit);
 
         $submissions = [];
-        foreach ($authors as $authorId) {
-            $author = Repo::author()->get($authorId);
-
-            if (!is_null($author)) {
-                $authorPublication = Repo::publication()->get($author->getData('publicationId'));
-                $authorSubmission = Repo::submission()->get($authorPublication->getData('submissionId'));
-
-                if (
-                    $authorSubmission->getData('contextId') == $contextId
-                    && $authorSubmission->getData('dateSubmitted')
-                    && !array_key_exists($authorSubmission->getId(), $submissions)
-                ) {
-                    $submissions[$authorSubmission->getId()] = $authorSubmission;
-                }
+        foreach ($similarAuthors as $authorData) {
+            $submissionId = $authorData['submission_id'];
+            $author = Repo::author()->get($authorData['author_id']);
+            
+            if (!array_key_exists($submissionId, $submissions)) {
+                $authorSubmission = Repo::submission()->get($submissionId);
+                $submissions[$submissionId] = $authorSubmission;
             }
         }
 
