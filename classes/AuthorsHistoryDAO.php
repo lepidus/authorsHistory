@@ -125,31 +125,19 @@ class AuthorsHistoryDAO extends DAO
 
     private function getSubmissionDataFromId(int $submissionId)
     {
-        $result = DB::table('submissions')
-            ->where('submission_id', $submissionId)
-            ->select('submission_id', 'current_publication_id', 'status')
-            ->first();
-        $submissionData = get_object_vars($result);
-
-        $submission = new Submission();
-        $submission->setAllData([
-            'id' => $submissionData['submission_id'],
-            'currentPublicationId' => $submissionData['current_publication_id'],
-            'status' => $submissionData['status']
-        ]);
-
-        $result = DB::table('publications AS p')
+        $result = DB::table('submissions AS s')
+            ->leftJoin('publications AS p', 's.current_publication_id', '=', 'p.publication_id')
             ->leftJoin('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
-            ->where('p.publication_id', $submissionData['current_publication_id'])
+            ->where('s.submission_id', $submissionId)
             ->whereIn('ps.setting_name', ['urlPath', 'title', 'subtitle'])
-            ->select('ps.locale', 'ps.setting_name', 'ps.setting_value')
+            ->select('s.submission_id', 's.status', 'p.publication_id', 'ps.locale', 'ps.setting_name', 'ps.setting_value')
             ->get();
 
         $publication = new Publication();
-        $publication->setData('id', $submissionData['current_publication_id']);
         foreach ($result as $row) {
             $rowData = get_object_vars($row);
 
+            $publication->setData('id', $rowData['publication_id']);
             if ($rowData['setting_name'] == 'urlPath') {
                 $publication->setData($rowData['setting_name'], $rowData['setting_value']);
                 continue;
@@ -157,6 +145,14 @@ class AuthorsHistoryDAO extends DAO
 
             $publication->setData($rowData['setting_name'], $rowData['setting_value'], $rowData['locale']);
         }
+
+        $submission = new Submission();
+        $submission->setAllData([
+            'id' => $rowData['submission_id'],
+            'status' => $rowData['status'],
+            'currentPublicationId' => $rowData['publication_id'],
+            'publications' => [$publication]
+        ]);
 
         $submission->setData('publications', [$publication]);
         return $submission;
