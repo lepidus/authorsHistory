@@ -17,6 +17,8 @@ namespace APP\plugins\generic\authorsHistory\classes;
 use APP\facades\Repo;
 use Illuminate\Support\Facades\DB;
 use PKP\db\DAO;
+use APP\submission\Submission;
+use APP\publication\Publication;
 
 class AuthorsHistoryDAO extends DAO
 {
@@ -111,14 +113,52 @@ class AuthorsHistoryDAO extends DAO
         $submissions = [];
         foreach ($similarAuthors as $authorData) {
             $submissionId = $authorData['submission_id'];
-            $author = Repo::author()->get($authorData['author_id']);
 
             if (!array_key_exists($submissionId, $submissions)) {
-                $authorSubmission = Repo::submission()->get($submissionId);
+                $authorSubmission = $this->getSubmissionDataFromId($submissionId);
                 $submissions[$submissionId] = $authorSubmission;
             }
         }
 
         return $submissions;
+    }
+
+    private function getSubmissionDataFromId(int $submissionId)
+    {
+        $result = DB::table('submissions')
+            ->where('submission_id', $submissionId)
+            ->select('submission_id', 'current_publication_id', 'status')
+            ->first();
+        $submissionData = get_object_vars($result);
+
+        $submission = new Submission();
+        $submission->setAllData([
+            'id' => $submissionData['submission_id'],
+            'currentPublicationId' => $submissionData['current_publication_id'],
+            'status' => $submissionData['status']
+        ]);
+
+        $result = DB::table('publications AS p')
+            ->leftJoin('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
+            ->where('p.publication_id', $submissionData['current_publication_id'])
+            ->whereIn('ps.setting_name', ['urlPath', 'title', 'subtitle'])
+            ->select('ps.locale', 'ps.setting_name', 'ps.setting_value')
+            ->get();
+
+        $publication = new Publication();
+        $publication->setData('id', $submissionData['current_publication_id']);
+        foreach ($result as $row) {
+            $rowData = get_object_vars($row);
+
+            if ($rowData['setting_name'] == 'urlPath') {
+                $publication->setData($rowData['setting_name'], $rowData['setting_value']);
+                continue;
+            }
+
+            $publication->setData($rowData['setting_name'], $rowData['setting_value'], $rowData['locale']);
+        }
+
+        $submission->setData('publications', [$publication]);
+        return $submission;
     }
 }
