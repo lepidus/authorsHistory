@@ -110,34 +110,48 @@ class AuthorsHistoryDAO extends DAO
     {
         $similarAuthors = $this->getSimilarAuthors($contextId, $email, $orcid, $givenName, $itemsPerPageLimit);
 
-        $submissions = [];
+        $submissionsIds = [];
         foreach ($similarAuthors as $authorData) {
             $submissionId = $authorData['submission_id'];
-
-            if (!array_key_exists($submissionId, $submissions)) {
-                $authorSubmission = $this->getSubmissionDataFromId($submissionId);
-                $submissions[$submissionId] = $authorSubmission;
+            if (!array_key_exists($submissionId, $submissionsIds)) {
+                $submissionsIds[$submissionId] = $submissionId;
             }
         }
 
-        return $submissions;
+        return $this->getSubmissionsFromIds(array_values($submissionsIds));
     }
 
-    private function getSubmissionDataFromId(int $submissionId)
+    private function getSubmissionsFromIds(array $submissionsIds)
     {
         $result = DB::table('submissions AS s')
             ->leftJoin('publications AS p', 's.current_publication_id', '=', 'p.publication_id')
             ->leftJoin('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
-            ->where('s.submission_id', $submissionId)
+            ->whereIn('s.submission_id', $submissionsIds)
             ->whereIn('ps.setting_name', ['urlPath', 'title', 'subtitle'])
             ->select('s.submission_id', 's.status', 'p.publication_id', 'ps.locale', 'ps.setting_name', 'ps.setting_value')
             ->get();
 
-        $publication = new Publication();
+        $submissions = [];
         foreach ($result as $row) {
             $rowData = get_object_vars($row);
+            $submissionId = $rowData['submission_id'];
 
-            $publication->setData('id', $rowData['publication_id']);
+            if (!isset($submissions[$submissionId])) {
+                $publication = new Publication();
+                $publication->setData('id', $rowData['publication_id']);
+
+                $submission = new Submission();
+                $submission->setAllData([
+                    'id' => $submissionId,
+                    'status' => $rowData['status'],
+                    'currentPublicationId' => $rowData['publication_id'],
+                    'publications' => [$publication]
+                ]);
+
+                $submissions[$submissionId] = $submission;
+            }
+
+            $publication = $submissions[$submissionId]->getCurrentPublication();
             if ($rowData['setting_name'] == 'urlPath') {
                 $publication->setData($rowData['setting_name'], $rowData['setting_value']);
                 continue;
@@ -146,15 +160,6 @@ class AuthorsHistoryDAO extends DAO
             $publication->setData($rowData['setting_name'], $rowData['setting_value'], $rowData['locale']);
         }
 
-        $submission = new Submission();
-        $submission->setAllData([
-            'id' => $rowData['submission_id'],
-            'status' => $rowData['status'],
-            'currentPublicationId' => $rowData['publication_id'],
-            'publications' => [$publication]
-        ]);
-
-        $submission->setData('publications', [$publication]);
-        return $submission;
+        return $submissions;
     }
 }
