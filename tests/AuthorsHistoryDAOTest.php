@@ -9,8 +9,9 @@ use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryDAOTest extends DatabaseTestCase
 {
-    private $authors;
+    private $contextId = 1;
     private $submission;
+    private $authors;
     private $locale = "pt_BR";
     private $testAuthorsData = [
         [
@@ -52,15 +53,15 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
 
     private function createTestSubmission(): Submission
     {
-        $contextId = 1;
-        $context = DAORegistry::getDAO('JournalDAO')->getById($contextId);
+        $context = DAORegistry::getDAO('JournalDAO')->getById($this->contextId);
 
         $submission = new Submission();
-        $submission->setData('contextId', $contextId);
+        $submission->setData('contextId', $this->contextId);
+        $submission->setData('submissionProgress', '');
         $publication = new Publication();
 
-        $this->submissionId = Repo::submission()->add($submission, $publication, $context);
-        $submission = Repo::submission()->get($this->submissionId);
+        $submissionId = Repo::submission()->add($submission, $publication, $context);
+        $submission = Repo::submission()->get($submissionId);
 
         return $submission;
     }
@@ -90,11 +91,24 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         return (int) Repo::author()->add($author);
     }
 
+    private function mapExpectedAuthors(array $authors)
+    {
+        $mappedAuthors = [];
+        foreach ($authors as $authorId) {
+            $mappedAuthors[$authorId] = [
+                'author_id' => $authorId,
+                'submission_id' => $this->submission->getId()
+            ];
+        }
+
+        return $mappedAuthors;
+    }
+
     public function testRetrieveAuthorsByEmail()
     {
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $expectedAuthors = [$this->authors[0], $this->authors[2]];
-        $retrievedAuthors = $authorsHistoryDAO->getAuthorsByEmail($this->testAuthorsData[0]['email']);
+        $expectedAuthors = $this->mapExpectedAuthors([$this->authors[0], $this->authors[2]]);
+        $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthorsByEmail($this->testAuthorsData[0]['email'], $this->contextId, true);
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }
@@ -102,8 +116,8 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
     public function testRetrieveAuthorsByOrcid()
     {
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $expectedAuthors = [$this->authors[0], $this->authors[1]];
-        $retrievedAuthors = $authorsHistoryDAO->getAuthorsByOrcid($this->testAuthorsData[0]['orcid']);
+        $expectedAuthors = $this->mapExpectedAuthors([$this->authors[0], $this->authors[1]]);
+        $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthorsByOrcid($this->testAuthorsData[0]['orcid'], $this->contextId);
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }
@@ -111,8 +125,12 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
     public function testRetrieveAuthorsByGivenNameAndEmail()
     {
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $expectedAuthors = [$this->authors[0]];
-        $retrievedAuthors = $authorsHistoryDAO->getAuthorIdByGivenNameAndEmail($this->testAuthorsData[0]['givenName'], $this->testAuthorsData[0]['email']);
+        $expectedAuthors = $this->mapExpectedAuthors([$this->authors[0]]);
+        $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthorsByGivenNameAndEmail(
+            $this->testAuthorsData[0]['givenName'],
+            $this->testAuthorsData[0]['email'],
+            $this->contextId
+        );
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }
@@ -120,15 +138,14 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
     public function testRetrieveSimilarAuthors()
     {
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $expectedAuthors = $this->authors;
+        $expectedAuthors = $this->mapExpectedAuthors($this->authors);
         $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthors(
+            $this->contextId,
             $this->testAuthorsData[0]['email'],
             $this->testAuthorsData[0]['orcid'],
             $this->testAuthorsData[0]['givenName'],
             10
         );
-        $retrievedAuthors = array_values($retrievedAuthors);
-        sort($retrievedAuthors, SORT_NUMERIC);
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }
@@ -136,15 +153,14 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
     public function testRetrieveSimilarAuthorsWithNullEmail()
     {
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $expectedAuthors = [$this->authors[0], $this->authors[1]];
+        $expectedAuthors =  $this->mapExpectedAuthors([$this->authors[0], $this->authors[1]]);
         $retrievedAuthors = $authorsHistoryDAO->getSimilarAuthors(
+            $this->contextId,
             null,
             $this->testAuthorsData[0]['orcid'],
             $this->testAuthorsData[0]['givenName'],
             10
         );
-        $retrievedAuthors = array_values($retrievedAuthors);
-        sort($retrievedAuthors, SORT_NUMERIC);
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
     }

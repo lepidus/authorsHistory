@@ -26,13 +26,14 @@ class AuthorsHistoryDAO extends DAO
 
         $similarAuthors = [];
         foreach ($result as $row) {
-            $similarAuthors[] = get_object_vars($row);
+            $rowData = get_object_vars($row);
+            $similarAuthors[$rowData['author_id']] = $rowData;
         }
 
         return $similarAuthors;
     }
 
-    public function getSimilarAuthorsByOrcid(string $orcid)
+    public function getSimilarAuthorsByOrcid(string $orcid, int $contextId)
     {
         $query = DB::table('author_settings AS ast')
             ->leftJoin('authors AS a', 'ast.author_id', '=', 'a.author_id')
@@ -47,7 +48,7 @@ class AuthorsHistoryDAO extends DAO
         return $this->executeQuery($query);
     }
 
-    public function getSimilarAuthorsByEmailQuery(string $email, int $contextId)
+    public function getSimilarAuthorsByEmail(string $email, int $contextId, bool $executeQuery = false)
     {
         $query = DB::table('authors AS a')
             ->leftJoin('publications AS p', 'a.publication_id', '=', 'p.publication_id')
@@ -57,10 +58,14 @@ class AuthorsHistoryDAO extends DAO
             ->where('s.submission_progress', '=', '')
             ->select('a.author_id', 's.submission_id');
 
+        if ($executeQuery) {
+            return $this->executeQuery($query);
+        }
+
         return $query;
     }
 
-    public function getSimilarAuthorsByGivenNameAndEmail($givenName, $email)
+    public function getSimilarAuthorsByGivenNameAndEmail(string $givenName, string $email, int $contextId)
     {
         $query = DB::table('authors AS a')
             ->leftJoin('author_settings AS ast', 'a.author_id', '=', 'ast.author_id')
@@ -81,15 +86,19 @@ class AuthorsHistoryDAO extends DAO
         $authors = [];
 
         if (!empty($email)) {
-            $authorsByEmailQuery = $this->getSimilarAuthorsByEmailQuery($email, $contextId);
+            $authorsByEmailQuery = $this->getSimilarAuthorsByEmail($email, $contextId);
             $authors = ($authorsByEmailQuery->count() > $itemsPerPageLimit)
-                ? $this->getSimilarAuthorsByGivenNameAndEmail($givenName, $email)
+                ? $this->getSimilarAuthorsByGivenNameAndEmail($givenName, $email, $contextId)
                 : $this->executeQuery($authorsByEmailQuery);
         }
 
         if (!empty($orcid)) {
-            $authorsFromOrcid = $this->getSimilarAuthorsByOrcid($orcid);
-            $authors = array_unique(array_merge($authors, $authorsFromOrcid));
+            $authorsFromOrcid = $this->getSimilarAuthorsByOrcid($orcid, $contextId);
+            foreach ($authorsFromOrcid as $author) {
+                if (!isset($authors[$author['author_id']])) {
+                    $authors[$author['author_id']] = $author;
+                }
+            }
         }
 
         return $authors;
