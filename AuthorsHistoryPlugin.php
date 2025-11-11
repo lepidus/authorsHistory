@@ -42,7 +42,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
 
     private function getAuthorsData($submission, $itemsPerPageLimit)
     {
-        $listAuthorsData = array();
+        $listAuthorsData = [];
         $publication = $submission->getCurrentPublication();
         $correspondenceContact = $publication->getData('primaryContactId');
         $contextId = $submission->getData('contextId');
