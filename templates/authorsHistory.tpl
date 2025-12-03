@@ -40,7 +40,7 @@
 
                 {$totalAuthorSubmissions = count($authorData['submissions']) }
                 
-                {if $itemsPerPage = 0}
+                {if $itemsPerPage == 0}
                     {$totalPages = 1}
                 {else}    
                     {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
