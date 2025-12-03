@@ -39,8 +39,12 @@
                 <div class="authorPublications">
 
                 {$totalAuthorSubmissions = count($authorData['submissions']) }
-                {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
-        
+                
+                {if $itemsPerPage == 0}
+                    {$totalPages = 1}
+                {else}    
+                    {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
+                {/if}
                     {foreach from=$authorData['submissions'] item=sub}
                             <div class="authorPublication">
                                 <div class="submissionId">
