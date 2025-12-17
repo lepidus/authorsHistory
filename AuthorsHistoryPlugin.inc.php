@@ -78,9 +78,11 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
         );
         $itemsPerPage = $request->getContext()->getData('itemsPerPage');
+        $itemsPerPage = (int)$itemsPerPage == 0 ? 10 : $itemsPerPage;
+
         $smarty->assign([
             'listDataAuthors' => $this->getAuthorsData($submission, $itemsPerPage),
-            'itemsPerPage', $itemsPerPage,
+            'itemsPerPage' => $itemsPerPage,
             'submissionType' => $this->getSubmissionType()
         ]);
 
