@@ -19,6 +19,13 @@ use APP\core\Application;
 use PKP\db\DAORegistry;
 use PKP\plugins\Hook;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
+use APP\template\TemplateManager;
+use Illuminate\Http\Request as IlluminateRequest;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Response;
+use PKP\core\PKPBaseController;
+use PKP\handler\APIHandler;
+use PKP\security\Role;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -34,78 +41,118 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
-            Hook::add('Template::Workflow::Publication', [$this, 'addToWorkflow']);
+            $request = Application::get()->getRequest();
+            $templateMgr = TemplateManager::getManager($request);
+            $templateMgr->addJavaScript(
+                'AuthorsHistory',
+                "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.iife.js",
+                [
+                    'inline' => false,
+                    'contexts' => ['backend'],
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                ]
+            );
+            $templateMgr->addStyleSheet(
+                'AuthorsHistoryStyle',
+                "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.css",
+                ['contexts' => ['backend']]
+            );
+
+            $this->addApiEndpoint();
         }
 
         return $success;
     }
 
-    private function getAuthorsData($submission, $itemsPerPageLimit)
+    private function addApiEndpoint(): void
     {
-        $listAuthorsData = [];
-        $publication = $submission->getCurrentPublication();
-        $correspondenceContact = $publication->getData('primaryContactId');
-        $contextId = $submission->getData('contextId');
+        Hook::add('APIHandler::endpoints::submissions', function (string $hookName, PKPBaseController &$apiController, APIHandler $apiHandler): bool {
+            $apiHandler->addRoute(
+                'GET',
+                'authorsHistory',
+                function (IlluminateRequest $request): JsonResponse {
+                    $submissionId = (int) $request->query('submissionId');
 
-        foreach ($publication->getData('authors') as $author) {
-            $authorData = [
-                'name' => $author->getFullName(),
-                'orcid' => $author->getOrcid(),
-                'email' => $author->getEmail(),
-                'correspondingAuthor' => ($correspondenceContact == $author->getId()),
-            ];
+                    if (!$submissionId) {
+                        return response()->json(['error' => 'submissionId is required'], Response::HTTP_BAD_REQUEST);
+                    }
 
-            $givenName = $author->getLocalizedGivenName();
-            $authorsHistoryDAO = new AuthorsHistoryDAO();
+                    $submission = \APP\facades\Repo::submission()->get($submissionId);
 
-            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions(
-                $contextId,
-                $authorData['orcid'],
-                $authorData['email'],
-                $givenName,
-                $itemsPerPageLimit
+                    if (!$submission) {
+                        return response()->json(['error' => 'Submission not found'], Response::HTTP_NOT_FOUND);
+                    }
+
+                    $publication = $submission->getCurrentPublication();
+                    $correspondenceContact = $publication->getData('primaryContactId');
+                    $contextId = $submission->getData('contextId');
+                    $context = Application::get()->getRequest()->getContext();
+                    $itemsPerPage = $context ? $context->getData('itemsPerPage') : 25;
+
+                    $authorsHistoryDAO = new AuthorsHistoryDAO();
+                    $listAuthorsData = [];
+
+                    foreach ($publication->getData('authors') as $author) {
+                        $authorData = [
+                            'name' => $author->getFullName(),
+                            'orcid' => $author->getOrcid(),
+                            'email' => $author->getEmail(),
+                            'correspondingAuthor' => ($correspondenceContact == $author->getId()),
+                        ];
+
+                        $givenName = $author->getLocalizedGivenName();
+                        $submissions = $authorsHistoryDAO->getAuthorSubmissions(
+                            $contextId,
+                            $authorData['orcid'],
+                            $authorData['email'],
+                            $givenName,
+                            $itemsPerPage
+                        );
+
+                        $authorData['submissions'] = [];
+                        foreach ($submissions as $sub) {
+                            $subPub = $sub->getCurrentPublication();
+                            $authorData['submissions'][] = [
+                                'id' => $sub->getId(),
+                                'title' => $subPub ? $subPub->getLocalizedFullTitle() : '',
+                                'status' => $sub->getData('status'),
+                                'statusLabel' => __($sub->getStatusKey()),
+                                'urlWorkflow' => Application::get()->getRequest()->getDispatcher()->url(
+                                    Application::get()->getRequest(),
+                                    Application::ROUTE_PAGE,
+                                    null,
+                                    'workflow',
+                                    'access',
+                                    [$sub->getId()]
+                                ),
+                                'urlPublished' => ($sub->getData('status') == \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
+                                    ? Application::get()->getRequest()->getDispatcher()->url(
+                                        Application::get()->getRequest(),
+                                        Application::ROUTE_PAGE,
+                                        null,
+                                        'article',
+                                        'view',
+                                        [$sub->getBestId()]
+                                    )
+                                    : null,
+                            ];
+                        }
+
+                        $listAuthorsData[] = $authorData;
+                    }
+
+                    return response()->json($listAuthorsData, Response::HTTP_OK);
+                },
+                'authorsHistory.get',
+                [
+                    Role::ROLE_ID_SITE_ADMIN,
+                    Role::ROLE_ID_MANAGER,
+                    Role::ROLE_ID_SUB_EDITOR,
+                ]
             );
 
-            $listAuthorsData[] = $authorData;
-        }
-        return $listAuthorsData;
-    }
-
-    public function addToWorkflow($hookName, $params)
-    {
-        $smarty = &$params[1];
-        $output = &$params[2];
-        $submission = $smarty->getTemplateVars('submission');
-        $request = Application::get()->getRequest();
-        $user = $request->getUser();
-
-        $smarty->assign(
-            'userIsManager',
-            $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
-        );
-        $itemsPerPage = $request->getContext()->getData('itemsPerPage');
-        $smarty->assign([
-            'listDataAuthors' => $this->getAuthorsData($submission, $itemsPerPage),
-            'itemsPerPage', $itemsPerPage,
-            'submissionType' => $this->getSubmissionType()
-        ]);
-
-        $output .= sprintf(
-            '<tab id="authorsHistory" label="%s">%s</tab>',
-            __('plugins.generic.authorsHistory.displayName'),
-            $smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))
-        );
-    }
-
-    private function getSubmissionType(): string
-    {
-        $applicationName = substr(Application::getName(), 0, 3);
-
-        if ($applicationName == 'ops') {
-            return 'preprint';
-        }
-
-        return 'article';
+            return false;
+        });
     }
 
     public function getDisplayName()
