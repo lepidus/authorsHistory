@@ -28,3 +28,9 @@ msgstr "Nenhuma submissão foi encontrada com este ORCID ou e-mail"
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.loadError"
+msgstr "Não foi possível carregar o histórico dos autores."
+
+msgid "plugins.generic.authorsHistory.submissionIdError"
+msgstr "Não foi possível identificar o ID da submissão."

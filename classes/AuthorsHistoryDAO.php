@@ -14,11 +14,10 @@
 
 namespace APP\plugins\generic\authorsHistory\classes;
 
-use APP\facades\Repo;
+use APP\publication\Publication;
+use APP\submission\Submission;
 use Illuminate\Support\Facades\DB;
 use PKP\db\DAO;
-use APP\submission\Submission;
-use APP\publication\Publication;
 
 class AuthorsHistoryDAO extends DAO
 {
@@ -123,12 +122,17 @@ class AuthorsHistoryDAO extends DAO
 
     private function getSubmissionsFromIds(array $submissionsIds)
     {
+        if (empty($submissionsIds)) {
+            return [];
+        }
+
         $result = DB::table('submissions AS s')
             ->leftJoin('publications AS p', 's.current_publication_id', '=', 'p.publication_id')
             ->leftJoin('publication_settings AS ps', 'p.publication_id', '=', 'ps.publication_id')
             ->whereIn('s.submission_id', $submissionsIds)
             ->whereIn('ps.setting_name', ['urlPath', 'title', 'subtitle'])
             ->select('s.submission_id', 's.status', 'p.publication_id', 'ps.locale', 'ps.setting_name', 'ps.setting_value')
+            ->orderByDesc('s.submission_id')
             ->get();
 
         $submissions = [];

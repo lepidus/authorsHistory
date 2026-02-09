@@ -7,16 +7,15 @@
  * 
  * @brief Template for display the list of submissions of an author
  *}
-
-<link rel="stylesheet" type="text/css" href="/plugins/generic/authorsHistory/styles/authorsHistory.css">
-<script type="text/javascript" src="/plugins/generic/authorsHistory/templates/pagination.js"></script>
-
-{$currentAuthor = 0}
 <div id="authorsHistory">
     <div id="historyHeader">
         <h2>{translate key="plugins.generic.authorsHistory.displayName"}</h2>
     </div>
     <div id="historyBody">
+        {if empty($listDataAuthors)}
+            <p class="authorPublications">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
+        {/if}
+
         {foreach from=$listDataAuthors item=authorData}
             <div class="authorHistory">
                 <h3>{$authorData['name']|escape}</h3>
@@ -35,19 +34,21 @@
                 {if empty($authorData['submissions'])}
                     <p class="authorPublications">{translate key="plugins.generic.authorsHistory.noPublications"}</p>
                 {else}
+                    {$totalAuthorSubmissions = count($authorData['submissions'])}
+                    {$totalPages = ceil($totalAuthorSubmissions / $itemsPerPage)}
 
-                <div class="authorPublications">
-
-                {$totalAuthorSubmissions = count($authorData['submissions']) }
-                {$totalPages = ceil($totalAuthorSubmissions/ {$itemsPerPage}) }
-        
+                    <div
+                        class="authorPublications"
+                        data-author-index="{$authorData@index|escape}"
+                        data-items-per-page="{$itemsPerPage|escape}"
+                    >
                     {foreach from=$authorData['submissions'] item=sub}
                             <div class="authorPublication">
                                 <div class="submissionId">
                                     <span>{$sub->getId()|escape}</span>
                                 </div>
                                 <div class="submissionTitle">
-                                    {if $userIsManager}
+                                    {if $userCanAccessWorkflow}
                                         <a href="{url page="workflow" op="access" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
                                             {$sub->getCurrentPublication()->getLocalizedFullTitle()|escape}
                                         </a>
@@ -57,8 +58,8 @@
                                         </span>
                                     {/if}
                                 </div>
-                                <div class="submissionStatus">
-                                    {if $sub->getStatus() == STATUS_PUBLISHED}
+                            <div class="submissionStatus">
+                                    {if $sub->getData('status') == STATUS_PUBLISHED}
                                         <a href="{url page=$submissionType op="view" path=$sub->getBestId()}" target="_blank" rel="noopener noreferrer">
                                             {translate key=$sub->getStatusKey()}
                                         </a>
@@ -68,29 +69,19 @@
                                 </div>
                             </div>
                     {/foreach}
+                    </div>
 
-                    <script>
-                    var authors = document.getElementsByClassName("authorPublications")[{$currentAuthor}];
-                    var authorInformation = authors.getElementsByClassName("authorPublication");
-
-                    if({$itemsPerPage} < {$totalAuthorSubmissions}){
-                        for(iterator= 0; iterator < ( {$totalAuthorSubmissions} - {$itemsPerPage} ); iterator++)
-                        authorInformation[iterator].style.display = 'none';
-                    }
-                    </script>
-
-                </div>
-                {$currentAuthor = $currentAuthor + 1}
-                
+                    {if $totalPages > 1}
+                        <div class="authorsHistoryPagination" data-author-index="{$authorData@index|escape}">
+                            <span>{translate key="plugins.generic.authorsHistory.pages"} &gt;&gt;</span>
+                            {for $currentPage=1 to $totalPages}
+                                <button class="pageButtons" data-page="{$currentPage|escape}" type="button">
+                                    {$currentPage}
+                                </button>
+                            {/for}
+                        </div>
+                    {/if}
                 {/if}
-
-                {translate key="plugins.generic.authorsHistory.pages"} >>
-                {for $currentPage=1 to $totalPages}
-                    <button class="pageButtons" onclick="showSubmissionsPage({$itemsPerPage},{$currentPage},{$totalAuthorSubmissions},{$currentAuthor})" type="button">
-                    {$currentPage}
-                    </button>
-                {/for} 
-
             </div>
         {/foreach}
     </div>

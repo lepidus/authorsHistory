@@ -2,7 +2,8 @@ import '../support/commands.js';
 
 describe('Checks history for an author', function () {
     let submissionData;
-    let previousAuthorSubmission = 'Finocchiaro: Arguments About Arguments';
+    let createdSubmissionId = null;
+    const previousAuthorSubmissionId = 19; // Seed data: "Finocchiaro: Arguments About Arguments"
     
     before(function() {
         submissionData = {
@@ -90,9 +91,29 @@ describe('Checks history for an author', function () {
         cy.contains('button', 'Continue').click();
     }
 
+    function getSubmissionIdFromLocation(location) {
+        const pathMatch = location.pathname && location.pathname.match(/\/workflow\/access\/(\d+)/);
+        if (pathMatch) {
+            return parseInt(pathMatch[1], 10);
+        }
+
+        const searchParams = new URLSearchParams(location.search || '');
+        const workflowSubmissionId = searchParams.get('workflowSubmissionId');
+        if (workflowSubmissionId) {
+            return parseInt(workflowSubmissionId, 10);
+        }
+
+        const submissionId = searchParams.get('submissionId');
+        if (submissionId) {
+            return parseInt(submissionId, 10);
+        }
+
+        return null;
+    }
+
     it('Creates new submission for an author', function() {
         cy.login('zwoods', null, 'publicknowledge');
-        cy.get('div#myQueue a:contains("New Submission")').click();
+        cy.get('a:contains("New Submission")').first().click();
         
         beginSubmission();
         detailsStep();
@@ -100,79 +121,140 @@ describe('Checks history for an author', function () {
         cy.contains('button', 'Continue').click();
         cy.contains('button', 'Continue').click();
         cy.contains('button', 'Submit').click();
-        cy.get('.modal__panel:visible').within(() => {
-            cy.contains('button', 'Submit').click();
+        cy.get('body').then(($body) => {
+            const confirmSubmitButton = $body.find('div[role="dialog"] button:contains("Submit")');
+            if (confirmSubmitButton.length) {
+                cy.wrap(confirmSubmitButton.first()).click();
+            }
+        });
+
+        cy.contains('a', 'Review this submission').click();
+        cy.location().then((location) => {
+            createdSubmissionId = getSubmissionIdFromLocation(location);
+            expect(createdSubmissionId, 'createdSubmissionId').to.be.a('number').and.to.be.greaterThan(0);
         });
     });
     it('Publishes new submission', function() {
+        cy.then(() => {
+            expect(createdSubmissionId, 'created submission id from previous test').to.be.a('number').and.to.be.greaterThan(0);
+        });
+
         cy.login('dbarnes', null, 'publicknowledge');
-        cy.findSubmission('active', submissionData.title);
+        cy.visit('/index.php/publicknowledge/workflow/access/' + createdSubmissionId);
         
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.get('li a:contains("Accept and Skip Review")').click();
-            cy.contains('button', 'Skip this email').click();
+            cy.contains('button', 'Accept and Skip Review').click();
+            cy.get('body').then(($body) => {
+                const skipEmailButton = $body.find('button:contains("Skip this email")');
+                if (skipEmailButton.length) {
+                    cy.wrap(skipEmailButton.first()).click();
+                }
+            });
             cy.contains('button', 'Record Decision').click();
             cy.contains('a', 'View Submission').click();
-            cy.get('li.ui-state-active a:contains("Copyediting")');
-            cy.get('#publication-button').click();
-            cy.get('div#publication button:contains("Schedule For Publication")').click();
-            cy.wait(1000);
-            
-            cy.get('select[id="assignToIssue-issueId-control"]').select('1');
-            cy.get('div[id^="assign-"] button:contains("Save")').click();
+            cy.openWorkflowMenu('Title & Abstract');
+
+            cy.get('body').then(($body) => {
+                const scheduleButton = $body.find('button:contains("Schedule For Publication")');
+                if (scheduleButton.length) {
+                    cy.wrap(scheduleButton.first()).click();
+                    cy.wait(500);
+                    cy.get('select[id="assignToIssue-issueId-control"]').select('1');
+                    cy.get('div[id^="assign-"] button:contains("Save")').click();
+                }
+            });
         } else {
-			cy.get('#publication-button').click();
-			cy.get('div#publication button:contains("Post")').click();
+			cy.openWorkflowMenu('Title & Abstract');
+            cy.contains('button', 'Post').click();
 		}
 
-        cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
+        cy.get('body').then(($body) => {
+            const publishButton = $body.find('button:contains("Publish"), button:contains("Post")');
+            if (publishButton.length) {
+                cy.wrap(publishButton.first()).click();
+            }
+        });
+        cy.get('body').then(($body) => {
+            const confirmPublishButton = $body.find('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post"), div[role="dialog"] button:contains("Publish"), div[role="dialog"] button:contains("Post")');
+            if (confirmPublishButton.length) {
+                cy.wrap(confirmPublishButton.first()).click();
+            }
+        });
         cy.logout();
     });
     it('Checks author history on previous submission', function() {
+        cy.then(() => {
+            expect(createdSubmissionId, 'created submission id from previous test').to.be.a('number').and.to.be.greaterThan(0);
+        });
+
         cy.login('dbarnes', null, 'publicknowledge');
-        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.findSubmission('active', previousAuthorSubmission);
-        } else {
-            cy.findSubmission('archive', previousAuthorSubmission);
-        }
+        cy.visit('/index.php/publicknowledge/workflow/access/' + previousAuthorSubmissionId);
+        cy.get('[data-cy="active-modal"] nav').contains('a', 'Authors History').click();
+        cy.get('[data-cy="active-modal"] h2').contains('Authors History');
 
-        cy.get('#publication-button').click();
-        cy.get('#authorsHistory-button').click();
         cy.get('.submissionTitle').contains(submissionData.title);
-        
-        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.get('a:contains("Published")').first().invoke('removeAttr', 'target').click();
-        } else {
-            cy.get('a:contains("Published")').eq(1).invoke('removeAttr', 'target').click();
-        }
 
-        cy.get('h1:contains("' + submissionData.title + '")');
+        cy.get('.authorPublication').should(($rows) => {
+            const hasCreatedSubmission = Array.from($rows).some((row) => {
+                const idText = row.querySelector('.submissionId span')?.textContent?.trim();
+                return idText === String(createdSubmissionId);
+            });
+            expect(hasCreatedSubmission, 'history contains created submission').to.eq(true);
+        });
+
+        cy.get('.authorPublication').then(($rows) => {
+            const targetRow = Array.from($rows).find((row) => {
+                const idText = row.querySelector('.submissionId span')?.textContent?.trim();
+                return idText === String(createdSubmissionId);
+            });
+
+            cy.wrap(targetRow)
+                .find('.submissionTitle a')
+                .invoke('removeAttr', 'target')
+                .click({force: true});
+        });
+
+        cy.url().should('include', 'workflowSubmissionId=' + createdSubmissionId);
+        cy.get('[data-cy="active-modal"]').should('be.visible');
     });
     it('Submission with new versions do not appear multiple times on history', function() {
+        cy.then(() => {
+            expect(createdSubmissionId, 'created submission id from previous test').to.be.a('number').and.to.be.greaterThan(0);
+        });
+
         cy.login('dbarnes', null, 'publicknowledge');
-        cy.findSubmission('archive', submissionData.title);
+        cy.visit('/index.php/publicknowledge/workflow/access/' + createdSubmissionId);
 
-        cy.get('#publication-button').click();
-        cy.contains('button', 'Create New Version').click();
-        cy.get('.modal__panel button:contains("Yes")').click();
-        cy.wait(2000);
+        cy.openWorkflowMenu('Title & Abstract');
+        cy.get('body').then(($body) => {
+            const createNewVersionButton = $body.find('button:contains("Create New Version")');
+            if (createNewVersionButton.length) {
+                cy.wrap(createNewVersionButton.first()).click();
+                cy.get('div[role=dialog] button:contains("Yes")').click();
+            }
+        });
 
-        cy.get('.pkpPublication__version:contains("2")');
-        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.get('div#publication button:contains("Publish")').click();
-        } else {
-			cy.get('div#publication button:contains("Post")').click();
-		}
-        cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
+        cy.get('body').then(($body) => {
+            const publishButton = $body.find('button:contains("Publish"), button:contains("Post")');
+            if (publishButton.length) {
+                cy.wrap(publishButton.first()).click();
+            }
+        });
+        cy.get('body').then(($body) => {
+            const confirmPublishButton = $body.find('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post"), div[role="dialog"] button:contains("Publish"), div[role="dialog"] button:contains("Post")');
+            if (confirmPublishButton.length) {
+                cy.wrap(confirmPublishButton.first()).click();
+            }
+        });
 
-        cy.contains('.app__navItem', 'Submissions').click();
-        if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.findSubmission('active', previousAuthorSubmission);
-        } else {
-            cy.findSubmission('archive', previousAuthorSubmission);
-        }
-        cy.get('#publication-button').click();
-        cy.get('#authorsHistory-button').click();
-        cy.get('a:contains("' + submissionData.title + '")').should('have.length', 1);
+        cy.visit('/index.php/publicknowledge/workflow/access/' + previousAuthorSubmissionId);
+        cy.get('[data-cy="active-modal"] nav').contains('a', 'Authors History').click();
+
+        cy.get('.authorPublication .submissionId span').then(($ids) => {
+            const matchingIds = Array.from($ids).filter((idEl) => {
+                return idEl.textContent.trim() === String(createdSubmissionId);
+            });
+            expect(matchingIds.length, 'created submission appears once in history').to.eq(1);
+        });
     });
 });

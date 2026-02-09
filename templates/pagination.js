@@ -6,66 +6,66 @@
  * @brief JavaScript file for generation of multi-pages histories.
 */
 
-function featuredSubmissions(submissions,inferiorLimit,upperLimit,totalSubmissions){
-    var pageSubmissions = [];
-    
-    for(iterator = inferiorLimit; iterator < upperLimit && iterator < totalSubmissions ; iterator++)
-        pageSubmissions.push(submissions[iterator]);    
-    
-        return pageSubmissions;
-}
+(function () {
+    function showPage(authorContainer, page) {
+        var itemsPerPage = parseInt(authorContainer.dataset.itemsPerPage || "0", 10);
+        if (!itemsPerPage || itemsPerPage < 1) {
+            return;
+        }
 
-function remainingSubmissions(submissions,inferiorLimit,upperLimit,totalSubmissions){
-    var remainingSubmissionsList = [];
+        var publications = authorContainer.querySelectorAll(".authorPublication");
+        var start = (page - 1) * itemsPerPage;
+        var end = start + itemsPerPage;
 
-    for(var iterator = 0; iterator < totalSubmissions; iterator++){
-        
-        if(iterator < inferiorLimit)
-            remainingSubmissionsList.push(submissions[iterator]);
-        
-        if(iterator >= upperLimit)
-            remainingSubmissionsList.push(submissions[iterator]);
+        publications.forEach(function (publication, index) {
+            publication.style.display = index >= start && index < end ? "flex" : "none";
+        });
     }
 
-    return remainingSubmissionsList;
-}
+    function initializeAuthorPagination(authorContainer, rootElement) {
+        var itemsPerPage = parseInt(authorContainer.dataset.itemsPerPage || "0", 10);
+        if (!itemsPerPage || itemsPerPage < 1) {
+            return;
+        }
 
-function currentSubmissionsRange(currentPage,totalSubmissions,itemsPerPage){
-    var inferiorLimit = totalSubmissions - ( currentPage * itemsPerPage );
-    var upperLimit = inferiorLimit + itemsPerPage;
-    
-    if(inferiorLimit < 0)
-        return [0,itemsPerPage + inferiorLimit];
-    
-    return [inferiorLimit, upperLimit];        
-}
+        var authorIndex = authorContainer.dataset.authorIndex;
+        var paginationContainer = rootElement.querySelector('.authorsHistoryPagination[data-author-index="' + authorIndex + '"]');
+        if (!paginationContainer) {
+            return;
+        }
 
-function oldSubmissionsRange(currentPage,itemsPerPage){
-    var inferiorLimit = (currentPage - 1) * itemsPerPage;
-    var upperLimit = inferiorLimit + itemsPerPage;
+        var totalPublications = authorContainer.querySelectorAll(".authorPublication").length;
+        if (totalPublications <= itemsPerPage) {
+            showPage(authorContainer, 1);
+            paginationContainer.style.display = "none";
+            return;
+        }
 
-    return [inferiorLimit,upperLimit];
-}
+        paginationContainer.querySelectorAll(".pageButtons").forEach(function (button) {
+            button.addEventListener("click", function () {
+                var page = parseInt(button.dataset.page || "1", 10);
+                showPage(authorContainer, page);
+            });
+        });
 
-function showSubmissionsPage(itemsPerPage,currentPage,totalSubmissions,currentAuthor){
-    var authors = document.getElementsByClassName("authorPublications")[currentAuthor-1];
-    var authorInformation = authors.getElementsByClassName("authorPublication");
-    var pageSubmissions = [];
-    var otherSubmissions = [];
+        showPage(authorContainer, 1);
+    }
 
-    var inferiorLimit = currentSubmissionsRange(currentPage,totalSubmissions,itemsPerPage)[0];
-    var upperLimit = currentSubmissionsRange(currentPage,totalSubmissions,itemsPerPage)[1];
+    function init(rootElement) {
+        if (!rootElement) {
+            return;
+        }
 
-   pageSubmissions = featuredSubmissions(authorInformation,inferiorLimit,upperLimit,totalSubmissions);
-   otherSubmissions = remainingSubmissions(authorInformation,inferiorLimit,upperLimit,totalSubmissions);
+        rootElement.querySelectorAll(".authorPublications").forEach(function (authorContainer) {
+            initializeAuthorPagination(authorContainer, rootElement);
+        });
+    }
 
-   for(iterator = 0; iterator < pageSubmissions.length ; iterator++)
-       pageSubmissions[iterator].style.display = 'flex';
+    window.AuthorsHistoryPagination = {
+        init: init,
+    };
 
-   for(iterator = 0; iterator < otherSubmissions.length ; iterator++)
-       otherSubmissions[iterator].style.display = 'none';
-}
-
-
-
-
+    document.addEventListener("DOMContentLoaded", function () {
+        init(document.getElementById("authorsHistory"));
+    });
+})();

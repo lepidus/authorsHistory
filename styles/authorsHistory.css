@@ -9,6 +9,10 @@
     margin-bottom: 18px;
 }
 
+#authorsHistory-panel {
+    margin-top: 16px;
+}
+
 .authorHistory {
     margin-bottom: 18px;
     background-color: #DCDCDC;
@@ -81,5 +85,15 @@
     border-width: thin;
     background-color: #DCDCDC;
     width: 40px;
-    height: 20px;
+    height: 24px;
+    margin-left: 4px;
+}
+
+.authorsHistoryPagination {
+    margin-top: 10px;
+    margin-left: 18px;
+}
+
+.authorsHistoryPagination span {
+    margin-left: 0;
 }

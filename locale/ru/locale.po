@@ -29,3 +29,9 @@ msgstr "Нет материалов с этим ORCID или адресом эл
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.loadError"
+msgstr "Не удалось загрузить историю авторов."
+
+msgid "plugins.generic.authorsHistory.submissionIdError"
+msgstr "Не удалось определить ID материала."

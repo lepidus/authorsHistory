@@ -6,6 +6,7 @@ use APP\submission\Submission;
 use APP\publication\Publication;
 use APP\author\Author;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
+use PKP\db\DAORegistry;
 
 class AuthorsHistoryDAOTest extends DatabaseTestCase
 {
@@ -17,21 +18,18 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         [
             'givenName' => 'Yves Saint Laurent',
             'familyName' => 'Design',
-            'affiliation' => 'Lepidus Tecnologia',
             'email' => 'yves.SL@naoexiste.com.br',
             'orcid' => '0000-0002-1234-5678'
         ],
         [
             'givenName' => 'Coco Chanel',
             'familyName' => 'Fashion',
-            'affiliation' => 'Chanel S.A.',
             'email' => 'coco.chanel@naoexiste.com.br',
             'orcid' => '0000-0002-1234-5678'
         ],
         [
             'givenName' => 'Giorgio Armani',
             'familyName' => 'Luxury',
-            'affiliation' => 'Armani Group',
             'email' => 'yves.SL@naoexiste.com.br',
             'orcid' => '0000-0002-3456-7890'
         ]
@@ -84,7 +82,6 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $author->setData('publicationId', $publication->getId());
         $author->setGivenName($authorData['givenName'], $this->locale);
         $author->setFamilyName($authorData['familyName'], $this->locale);
-        $author->setAffiliation($authorData['affiliation'], $this->locale);
         $author->setEmail($authorData['email'] ?? null);
         $author->setOrcid($authorData['orcid'] ?? null);
 
@@ -163,5 +160,19 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         );
 
         $this->assertEquals($expectedAuthors, $retrievedAuthors);
+    }
+
+    public function testRetrieveAuthorSubmissionsWithNoMatches()
+    {
+        $authorsHistoryDAO = new AuthorsHistoryDAO();
+        $retrievedSubmissions = $authorsHistoryDAO->getAuthorSubmissions(
+            $this->contextId,
+            '0000-0000-0000-0000',
+            'nao.existe@email.com',
+            'Nome Inexistente',
+            10
+        );
+
+        $this->assertEquals([], $retrievedSubmissions);
     }
 }

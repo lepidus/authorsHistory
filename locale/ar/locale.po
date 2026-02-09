@@ -29,3 +29,9 @@ msgstr "لم يتم العثور على أي طلبات نشر لهذا الـ O
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.loadError"
+msgstr "تعذر تحميل سجل المؤلفين."
+
+msgid "plugins.generic.authorsHistory.submissionIdError"
+msgstr "تعذر تحديد معرف الإرسال."
