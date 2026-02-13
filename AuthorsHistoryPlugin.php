@@ -110,29 +110,29 @@ class AuthorsHistoryPlugin extends GenericPlugin
                         );
 
                         $authorData['submissions'] = [];
-                        foreach ($submissions as $sub) {
-                            $subPub = $sub->getCurrentPublication();
+                        foreach ($submissions as $submission) {
+                            $publication = $submission->getCurrentPublication();
                             $authorData['submissions'][] = [
-                                'id' => $sub->getId(),
-                                'title' => $subPub ? $subPub->getLocalizedFullTitle() : '',
-                                'status' => $sub->getData('status'),
-                                'statusLabel' => __($sub->getStatusKey()),
+                                'id' => $submission->getId(),
+                                'title' => $publication ? $publication->getLocalizedFullTitle() : '',
+                                'status' => $submission->getData('status'),
+                                'statusLabel' => __($submission->getStatusKey()),
                                 'urlWorkflow' => Application::get()->getRequest()->getDispatcher()->url(
                                     Application::get()->getRequest(),
                                     Application::ROUTE_PAGE,
                                     null,
                                     'workflow',
                                     'access',
-                                    [$sub->getId()]
+                                    [$submission->getId()]
                                 ),
-                                'urlPublished' => ($sub->getData('status') == \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
+                                'urlPublished' => ($submission->getData('status') == \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
                                     ? Application::get()->getRequest()->getDispatcher()->url(
                                         Application::get()->getRequest(),
                                         Application::ROUTE_PAGE,
                                         null,
                                         'article',
                                         'view',
-                                        [$sub->getBestId()]
+                                        [$submission->getBestId()]
                                     )
                                     : null,
                             ];
