@@ -26,6 +26,7 @@ use Illuminate\Http\Response;
 use PKP\core\PKPBaseController;
 use PKP\handler\APIHandler;
 use PKP\security\Role;
+use PKP\submission\PKPSubmission;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -71,25 +72,44 @@ class AuthorsHistoryPlugin extends GenericPlugin
                 'GET',
                 'authorsHistory',
                 function (IlluminateRequest $request): JsonResponse {
+                    $pkpRequest = Application::get()->getRequest();
+                    $context = $pkpRequest->getContext();
+
+                    if (!$context || !$this->getEnabled((int) $context->getId())) {
+                        return response()->json(
+                            ['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')],
+                            Response::HTTP_NOT_FOUND
+                        );
+                    }
+
                     $submissionId = (int) $request->query('submissionId');
 
-                    if (!$submissionId) {
-                        return response()->json(['error' => __('plugins.generic.authorsHistory.error.submissionIdRequired')], Response::HTTP_BAD_REQUEST);
+                    if ($submissionId < 1) {
+                        return response()->json(
+                            ['error' => __('plugins.generic.authorsHistory.error.submissionIdRequired')],
+                            Response::HTTP_BAD_REQUEST
+                        );
                     }
 
                     $submission = \APP\facades\Repo::submission()->get($submissionId);
 
-                    if (!$submission) {
-                        return response()->json(['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')], Response::HTTP_NOT_FOUND);
+                    if (!$submission || (int) $submission->getData('contextId') !== (int) $context->getId()) {
+                        return response()->json(
+                            ['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')],
+                            Response::HTTP_NOT_FOUND
+                        );
                     }
 
                     $publication = $submission->getCurrentPublication();
                     $correspondenceContact = $publication->getData('primaryContactId');
-                    $contextId = $submission->getData('contextId');
-                    $context = Application::get()->getRequest()->getContext();
-                    $itemsPerPage = $context ? $context->getData('itemsPerPage') : 25;
+                    $contextId = (int) $context->getId();
+                    $itemsPerPage = (int) $context->getData('itemsPerPage');
+                    if ($itemsPerPage < 1) {
+                        $itemsPerPage = 25;
+                    }
 
                     $authorsHistoryDAO = new AuthorsHistoryDAO();
+                    $submissionType = $this->getSubmissionType();
                     $listAuthorsData = [];
 
                     foreach ($publication->getData('authors') as $author) {
@@ -101,7 +121,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
                         ];
 
                         $givenName = $author->getLocalizedGivenName();
-                        $submissions = $authorsHistoryDAO->getAuthorSubmissions(
+                        $authorSubmissions = $authorsHistoryDAO->getAuthorSubmissions(
                             $contextId,
                             $authorData['orcid'],
                             $authorData['email'],
@@ -110,29 +130,29 @@ class AuthorsHistoryPlugin extends GenericPlugin
                         );
 
                         $authorData['submissions'] = [];
-                        foreach ($submissions as $submission) {
-                            $publication = $submission->getCurrentPublication();
+                        foreach ($authorSubmissions as $authorSubmission) {
+                            $currentPublication = $authorSubmission->getCurrentPublication();
                             $authorData['submissions'][] = [
-                                'id' => $submission->getId(),
-                                'title' => $publication ? $publication->getLocalizedFullTitle() : '',
-                                'status' => $submission->getData('status'),
-                                'statusLabel' => __($submission->getStatusKey()),
-                                'urlWorkflow' => Application::get()->getRequest()->getDispatcher()->url(
-                                    Application::get()->getRequest(),
+                                'id' => $authorSubmission->getId(),
+                                'title' => $currentPublication ? $currentPublication->getLocalizedFullTitle() : '',
+                                'status' => $authorSubmission->getData('status'),
+                                'statusLabel' => __($authorSubmission->getStatusKey()),
+                                'urlWorkflow' => $pkpRequest->getDispatcher()->url(
+                                    $pkpRequest,
                                     Application::ROUTE_PAGE,
                                     null,
                                     'workflow',
                                     'access',
-                                    [$submission->getId()]
+                                    [$authorSubmission->getId()]
                                 ),
-                                'urlPublished' => ($submission->getData('status') == \PKP\submission\PKPSubmission::STATUS_PUBLISHED)
-                                    ? Application::get()->getRequest()->getDispatcher()->url(
-                                        Application::get()->getRequest(),
+                                'urlPublished' => ($authorSubmission->getData('status') == PKPSubmission::STATUS_PUBLISHED)
+                                    ? $pkpRequest->getDispatcher()->url(
+                                        $pkpRequest,
                                         Application::ROUTE_PAGE,
                                         null,
-                                        'article',
+                                        $submissionType,
                                         'view',
-                                        [$submission->getBestId()]
+                                        [$authorSubmission->getBestId()]
                                     )
                                     : null,
                             ];
@@ -153,6 +173,17 @@ class AuthorsHistoryPlugin extends GenericPlugin
 
             return false;
         });
+    }
+
+    public function getSubmissionType(): string
+    {
+        $applicationName = substr(Application::getName(), 0, 3);
+
+        if ($applicationName == 'ops') {
+            return 'preprint';
+        }
+
+        return 'article';
     }
 
     public function getDisplayName()
