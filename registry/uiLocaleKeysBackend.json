@@ -1,0 +1,12 @@
+[
+  "common.loading",
+  "email.email",
+  "plugins.generic.authorsHistory.displayName",
+  "plugins.generic.authorsHistory.loadError",
+  "plugins.generic.authorsHistory.noORCID",
+  "plugins.generic.authorsHistory.noPublications",
+  "plugins.generic.authorsHistory.orcid",
+  "plugins.generic.authorsHistory.pages",
+  "plugins.generic.authorsHistory.submissionIdError",
+  "submission.submit.selectPrincipalContact"
+]

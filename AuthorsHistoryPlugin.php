@@ -93,14 +93,6 @@ class AuthorsHistoryPlugin extends GenericPlugin
             'correspondingAuthorLabel' => __('submission.submit.selectPrincipalContact'),
         ];
 
-        $templateMgr->addStyleSheet(
-            'authorsHistoryStyles',
-            $pluginPath . '/styles/authorsHistory.css',
-            [
-                'contexts' => 'backend',
-                'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
-            ]
-        );
         $templateMgr->addJavaScript(
             'authorsHistoryConfig',
             'window.pkpAuthorsHistoryConfig = ' . json_encode($config, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) . ';',
@@ -110,14 +102,46 @@ class AuthorsHistoryPlugin extends GenericPlugin
                 'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
             ]
         );
-        $templateMgr->addJavaScript(
-            'authorsHistoryDashboard',
-            $pluginPath . '/js/authorsHistoryDashboard.js',
-            [
-                'contexts' => 'backend',
-                'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
-            ]
-        );
+        $pluginDir = __DIR__;
+        $buildJsPath = $pluginDir . '/public/build/build.iife.js';
+        $buildCssPath = $pluginDir . '/public/build/build.css';
+
+        if (file_exists($buildJsPath) && file_exists($buildCssPath)) {
+            $templateMgr->addStyleSheet(
+                'authorsHistoryStylesBuild',
+                $pluginPath . '/public/build/build.css',
+                [
+                    'contexts' => 'backend',
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                ]
+            );
+            $templateMgr->addJavaScript(
+                'authorsHistoryDashboardBuild',
+                $pluginPath . '/public/build/build.iife.js',
+                [
+                    'contexts' => 'backend',
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                    'inline' => false,
+                ]
+            );
+        } else {
+            $templateMgr->addStyleSheet(
+                'authorsHistoryStylesLegacy',
+                $pluginPath . '/styles/authorsHistory.css',
+                [
+                    'contexts' => 'backend',
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                ]
+            );
+            $templateMgr->addJavaScript(
+                'authorsHistoryDashboardLegacy',
+                $pluginPath . '/js/authorsHistoryDashboard.js',
+                [
+                    'contexts' => 'backend',
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                ]
+            );
+        }
 
         return false;
     }
