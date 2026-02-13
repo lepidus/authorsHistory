@@ -89,8 +89,9 @@ describe('Checks history for an author', function () {
             cy.publish('1', 'Vol. 1 No. 2 (2014)');
         } else {
             cy.openWorkflowMenu('Title & Abstract');
-			cy.get('button:contains("Post")').click();
-            cy.get('.pkpWorkflow__publishModal button:contains("Post"), .pkp_modal_panel button:contains("Post")').click();
+            cy.get('button:contains("Post"):visible').click();
+            cy.get('div:contains("All requirements have been met. Are you sure you want to post this?")');
+            cy.get('[id^="publish"] button:contains("Post")').click();
 		}
 
         cy.logout();
@@ -137,10 +138,12 @@ describe('Checks history for an author', function () {
 
             if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
                 cy.get('button:contains("Publish")').click();
+                cy.get('div.pkpWorkflow__publishModal button:contains("Publish")').click();
             } else {
-                cy.get('button:contains("Post")').click();
+                cy.get('button').contains('Post').click();
+                cy.contains('All requirements have been met.');
+                cy.get('.pkpWorkflow__publishModal button').contains('Post').click();
             }
-            cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
 
             cy.visit('index.php/publicknowledge/dashboard/editorial');
             if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
