@@ -58,13 +58,13 @@ class AuthorsHistoryPlugin extends GenericPlugin
                 ['contexts' => ['backend']]
             );
 
-            $this->addApiEndpoint();
+            $this->registerAuthorsHistoryRoute();
         }
 
         return $success;
     }
 
-    private function addApiEndpoint(): void
+    private function registerAuthorsHistoryRoute(): void
     {
         Hook::add('APIHandler::endpoints::submissions', function (string $hookName, PKPBaseController &$apiController, APIHandler $apiHandler): bool {
             $apiHandler->addRoute(
