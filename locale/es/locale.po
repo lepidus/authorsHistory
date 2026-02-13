@@ -28,3 +28,9 @@ msgstr "No se encontraron envíos con este ORCID o e-mail"
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.error.submissionIdRequired"
+msgstr "El ID del envío es obligatorio"
+
+msgid "plugins.generic.authorsHistory.error.submissionNotFound"
+msgstr "Envío no encontrado"

@@ -74,13 +74,13 @@ class AuthorsHistoryPlugin extends GenericPlugin
                     $submissionId = (int) $request->query('submissionId');
 
                     if (!$submissionId) {
-                        return response()->json(['error' => 'submissionId is required'], Response::HTTP_BAD_REQUEST);
+                        return response()->json(['error' => __('plugins.generic.authorsHistory.error.submissionIdRequired')], Response::HTTP_BAD_REQUEST);
                     }
 
                     $submission = \APP\facades\Repo::submission()->get($submissionId);
 
                     if (!$submission) {
-                        return response()->json(['error' => 'Submission not found'], Response::HTTP_NOT_FOUND);
+                        return response()->json(['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')], Response::HTTP_NOT_FOUND);
                     }
 
                     $publication = $submission->getCurrentPublication();

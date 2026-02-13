@@ -29,3 +29,9 @@ msgstr "لم يتم العثور على أي طلبات نشر لهذا الـ O
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.error.submissionIdRequired"
+msgstr "معرّف الإرسال مطلوب"
+
+msgid "plugins.generic.authorsHistory.error.submissionNotFound"
+msgstr "لم يتم العثور على الإرسال"

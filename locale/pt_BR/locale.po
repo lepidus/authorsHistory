@@ -28,3 +28,9 @@ msgstr "Nenhuma submissão foi encontrada com este ORCID ou e-mail"
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.error.submissionIdRequired"
+msgstr "O ID da submissão é obrigatório"
+
+msgid "plugins.generic.authorsHistory.error.submissionNotFound"
+msgstr "Submissão não encontrada"
