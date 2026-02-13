@@ -117,7 +117,6 @@ describe('Checks history for an author', function () {
     it('Submission with new versions do not appear multiple times on history', function() {
         cy.login('dbarnes', null, 'publicknowledge');
 
-        // First, check the current count of the title in Authors History
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
             cy.findSubmission('active', previousAuthorSubmission);
         } else {
@@ -126,7 +125,6 @@ describe('Checks history for an author', function () {
         cy.openWorkflowMenu('Authors History');
         cy.get('.authors-history').contains('a', submissionData.title);
         cy.get('.authors-history a:contains("' + submissionData.title + '")').its('length').then((initialCount) => {
-            // Create a new version and publish it
             cy.visit('index.php/publicknowledge/dashboard/editorial');
             cy.findSubmission('archive', submissionData.title);
 
@@ -144,7 +142,6 @@ describe('Checks history for an author', function () {
             }
             cy.get('div.pkpWorkflow__publishModal button:contains("Publish"), .pkp_modal_panel button:contains("Post")').click();
 
-            // Verify the count hasn't increased (no duplicates from new version)
             cy.visit('index.php/publicknowledge/dashboard/editorial');
             if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
                 cy.findSubmission('active', previousAuthorSubmission);
