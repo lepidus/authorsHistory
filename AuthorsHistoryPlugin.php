@@ -15,15 +15,22 @@
 namespace APP\plugins\generic\authorsHistory;
 
 use APP\core\Application;
+use APP\facades\Repo;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryHandler;
 use APP\submission\Submission;
 use APP\template\TemplateManager;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request as IlluminateRequest;
+use Illuminate\Http\Response;
 use PKP\core\PKPApplication;
+use PKP\core\PKPBaseController;
 use PKP\db\DAORegistry;
+use PKP\handler\APIHandler;
 use PKP\plugins\GenericPlugin;
 use PKP\plugins\Hook;
 use PKP\security\Role;
+use PKP\submission\PKPSubmission;
 use PKP\stageAssignment\StageAssignment;
 
 class AuthorsHistoryPlugin extends GenericPlugin
@@ -42,6 +49,7 @@ class AuthorsHistoryPlugin extends GenericPlugin
 
             Hook::add('TemplateManager::display', [$this, 'callbackTemplateDisplay']);
             Hook::add('LoadHandler', [$this, 'callbackHandleContent']);
+            $this->addApiEndpoint();
         }
 
         return $success;
@@ -69,12 +77,20 @@ class AuthorsHistoryPlugin extends GenericPlugin
             'index'
         );
         $pluginPath = $request->getBaseUrl() . '/' . $this->getPluginPath();
+        $apiEndpoint = rtrim($request->getBaseUrl(), '/') . '/index.php/' . $context->getPath() . '/api/v1/submissions/authorsHistory';
         $config = [
             'endpoint' => $endpoint,
+            'apiEndpoint' => $apiEndpoint,
             'tabLabel' => __('plugins.generic.authorsHistory.displayName'),
             'loadingLabel' => __('common.loading'),
             'loadErrorLabel' => __('plugins.generic.authorsHistory.loadError'),
             'submissionIdErrorLabel' => __('plugins.generic.authorsHistory.submissionIdError'),
+            'noPublicationsLabel' => __('plugins.generic.authorsHistory.noPublications'),
+            'noOrcidLabel' => __('plugins.generic.authorsHistory.noORCID'),
+            'orcidLabel' => __('plugins.generic.authorsHistory.orcid'),
+            'emailLabel' => __('email.email'),
+            'pagesLabel' => __('plugins.generic.authorsHistory.pages'),
+            'correspondingAuthorLabel' => __('submission.submit.selectPrincipalContact'),
         ];
 
         $templateMgr->addStyleSheet(
@@ -95,14 +111,6 @@ class AuthorsHistoryPlugin extends GenericPlugin
             ]
         );
         $templateMgr->addJavaScript(
-            'authorsHistoryPagination',
-            $pluginPath . '/templates/pagination.js',
-            [
-                'contexts' => 'backend',
-                'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
-            ]
-        );
-        $templateMgr->addJavaScript(
             'authorsHistoryDashboard',
             $pluginPath . '/js/authorsHistoryDashboard.js',
             [
@@ -112,6 +120,56 @@ class AuthorsHistoryPlugin extends GenericPlugin
         );
 
         return false;
+    }
+
+    private function addApiEndpoint(): void
+    {
+        Hook::add('APIHandler::endpoints::submissions', function (string $hookName, PKPBaseController &$apiController, APIHandler $apiHandler): bool {
+            $apiHandler->addRoute(
+                'GET',
+                'authorsHistory',
+                function (IlluminateRequest $request): JsonResponse {
+                    $pkpRequest = Application::get()->getRequest();
+                    $context = $pkpRequest->getContext();
+                    $user = $pkpRequest->getUser();
+                    if (!$context || !$this->getEnabled((int) $context->getId())) {
+                        return response()->json(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+                    }
+
+                    $submissionId = (int) $request->query('submissionId');
+                    if ($submissionId < 1) {
+                        return response()->json(['error' => 'submissionId is required'], Response::HTTP_BAD_REQUEST);
+                    }
+
+                    $submission = Repo::submission()->get($submissionId);
+                    if (!$submission || (int) $submission->getData('contextId') !== (int) $context->getId()) {
+                        return response()->json(['error' => 'Submission not found'], Response::HTTP_NOT_FOUND);
+                    }
+
+                    if (!$this->userCanAccessEditorialHistory($user, $submission, (int) $context->getId())) {
+                        return response()->json(['error' => 'Not found'], Response::HTTP_NOT_FOUND);
+                    }
+
+                    $itemsPerPage = (int) $context->getData('itemsPerPage');
+                    if ($itemsPerPage < 1) {
+                        $itemsPerPage = 25;
+                    }
+
+                    return response()->json($this->getAuthorsDataForApi($submission, $itemsPerPage), Response::HTTP_OK);
+                },
+                'authorsHistory.get',
+                [
+                    Role::ROLE_ID_SITE_ADMIN,
+                    Role::ROLE_ID_MANAGER,
+                    Role::ROLE_ID_SUB_EDITOR,
+                    Role::ROLE_ID_ASSISTANT,
+                    Role::ROLE_ID_AUTHOR,
+                    Role::ROLE_ID_REVIEWER,
+                ]
+            );
+
+            return false;
+        });
     }
 
     public function callbackHandleContent(string $hookName, array $args): bool
@@ -137,6 +195,9 @@ class AuthorsHistoryPlugin extends GenericPlugin
     {
         $listAuthorsData = [];
         $publication = $submission->getCurrentPublication();
+        if (!$publication) {
+            return $listAuthorsData;
+        }
         $correspondenceContact = $publication->getData('primaryContactId');
         $contextId = $submission->getData('contextId');
         $authorsHistoryDAO = new AuthorsHistoryDAO();
@@ -162,6 +223,51 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $listAuthorsData[] = $authorData;
         }
         return $listAuthorsData;
+    }
+
+    public function getAuthorsDataForApi(Submission $submission, int $itemsPerPageLimit): array
+    {
+        $request = Application::get()->getRequest();
+        $context = $request->getContext();
+        $contextPath = $context ? $context->getPath() : null;
+        $submissionType = $this->getSubmissionType();
+        $authorsData = $this->getAuthorsData($submission, $itemsPerPageLimit);
+
+        foreach ($authorsData as &$authorData) {
+            $formattedSubmissions = [];
+            foreach ($authorData['submissions'] as $submissionItem) {
+                $submissionPublication = $submissionItem->getCurrentPublication();
+                $status = (int) $submissionItem->getData('status');
+                $formattedSubmissions[] = [
+                    'id' => (int) $submissionItem->getId(),
+                    'title' => $submissionPublication ? $submissionPublication->getLocalizedFullTitle() : '',
+                    'status' => $status,
+                    'statusLabel' => __($submissionItem->getStatusKey()),
+                    'urlWorkflow' => $request->getDispatcher()->url(
+                        $request,
+                        Application::ROUTE_PAGE,
+                        $contextPath,
+                        'workflow',
+                        'access',
+                        [$submissionItem->getId()]
+                    ),
+                    'urlPublished' => $status === PKPSubmission::STATUS_PUBLISHED
+                        ? $request->getDispatcher()->url(
+                            $request,
+                            Application::ROUTE_PAGE,
+                            $contextPath,
+                            $submissionType,
+                            'view',
+                            [$submissionItem->getBestId()]
+                        )
+                        : null,
+                ];
+            }
+            $authorData['submissions'] = $formattedSubmissions;
+        }
+        unset($authorData);
+
+        return $authorsData;
     }
 
     public function userCanAccessEditorialHistory($user, Submission $submission, int $contextId): bool

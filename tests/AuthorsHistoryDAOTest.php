@@ -85,7 +85,16 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $author->setEmail($authorData['email'] ?? null);
         $author->setOrcid($authorData['orcid'] ?? null);
 
-        return (int) Repo::author()->add($author);
+        $authorId = (int) Repo::author()->add($author);
+
+        if (!empty($authorData['affiliation'])) {
+            $affiliation = Repo::affiliation()->newDataObject();
+            $affiliation->setAuthorId($authorId);
+            $affiliation->setName($authorData['affiliation'], $this->locale);
+            Repo::affiliation()->add($affiliation);
+        }
+
+        return $authorId;
     }
 
     private function mapExpectedAuthors(array $authors)

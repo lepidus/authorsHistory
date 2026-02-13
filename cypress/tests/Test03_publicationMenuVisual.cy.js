@@ -4,7 +4,7 @@ describe('Authors History - Visual check on publication menu', function () {
 		cy.visit('/index.php/publicknowledge/en/dashboard/editorial?currentViewId=published&workflowSubmissionId=1&workflowMenuKey=publication_titleAbstract');
 		cy.window().then((win) => {
 			expect(win.pkpAuthorsHistoryConfig, 'authors history config').to.exist;
-			expect(win.pkpAuthorsHistoryConfig.endpoint, 'authors history endpoint').to.be.a('string').and.not.to.be.empty;
+			expect(win.pkpAuthorsHistoryConfig.apiEndpoint, 'authors history api endpoint').to.be.a('string').and.not.to.be.empty;
 		});
 
 		cy.get('[data-cy="active-modal"]').should('be.visible');
@@ -22,8 +22,8 @@ describe('Authors History - Visual check on publication menu', function () {
 	it('Denies endpoint access to non-editorial user', function () {
 		cy.login('zwoods', null, 'publicknowledge');
 		cy.request({
-			url: '/index.php/publicknowledge/en/authorsHistory/index?submissionId=1',
+			url: '/index.php/publicknowledge/api/v1/submissions/authorsHistory?submissionId=1',
 			failOnStatusCode: false,
-		}).its('status').should('eq', 404);
+		}).its('status').should('be.oneOf', [403, 404]);
 	});
 });

@@ -89,6 +89,12 @@
     margin-left: 4px;
 }
 
+.pageButtons.activePageButton {
+    background-color: #006798;
+    border-color: #006798;
+    color: #ffffff;
+}
+
 .authorsHistoryPagination {
     margin-top: 10px;
     margin-left: 18px;
