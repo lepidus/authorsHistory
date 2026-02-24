@@ -1,0 +1,12 @@
+[
+  "common.loading",
+  "common.status",
+  "common.title",
+  "email.email",
+  "plugins.generic.authorsHistory.displayName",
+  "plugins.generic.authorsHistory.noORCID",
+  "plugins.generic.authorsHistory.noPublications",
+  "plugins.generic.authorsHistory.orcid",
+  "plugins.generic.authorsHistory.pages",
+  "submission.submit.selectPrincipalContact"
+]

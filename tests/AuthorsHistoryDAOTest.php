@@ -5,6 +5,7 @@ use APP\facades\Repo;
 use APP\submission\Submission;
 use APP\publication\Publication;
 use APP\author\Author;
+use PKP\affiliation\Affiliation;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 
 class AuthorsHistoryDAOTest extends DatabaseTestCase
@@ -84,11 +85,19 @@ class AuthorsHistoryDAOTest extends DatabaseTestCase
         $author->setData('publicationId', $publication->getId());
         $author->setGivenName($authorData['givenName'], $this->locale);
         $author->setFamilyName($authorData['familyName'], $this->locale);
-        $author->setAffiliation($authorData['affiliation'], $this->locale);
         $author->setEmail($authorData['email'] ?? null);
         $author->setOrcid($authorData['orcid'] ?? null);
 
-        return (int) Repo::author()->add($author);
+        $authorId = (int) Repo::author()->add($author);
+
+        if (!empty($authorData['affiliation'])) {
+            $affiliation = Repo::affiliation()->newDataObject();
+            $affiliation->setAuthorId($authorId);
+            $affiliation->setName($authorData['affiliation'], $this->locale);
+            Repo::affiliation()->add($affiliation);
+        }
+
+        return $authorId;
     }
 
     private function mapExpectedAuthors(array $authors)

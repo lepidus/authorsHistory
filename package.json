@@ -1,0 +1,16 @@
+{
+  "name": "authorshistoryplugin",
+  "version": "1.0.0",
+  "description": "Authors History plugin for Open Journal Systems",
+  "main": "index.js",
+  "scripts": {
+    "dev": "vite build --watch --minify=false",
+    "build": "vite build"
+  },
+  "author": "",
+  "license": "GPL-3",
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.2.1",
+    "vite": "^6.1.0"
+  }
+}

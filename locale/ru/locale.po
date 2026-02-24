@@ -29,3 +29,9 @@ msgstr "Нет материалов с этим ORCID или адресом эл
 
 msgid "plugins.generic.authorsHistory.orcid"
 msgstr "ORCID"
+
+msgid "plugins.generic.authorsHistory.error.submissionIdRequired"
+msgstr "Требуется идентификатор материала"
+
+msgid "plugins.generic.authorsHistory.error.submissionNotFound"
+msgstr "Материал не найден"

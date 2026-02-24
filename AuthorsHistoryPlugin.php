@@ -19,6 +19,9 @@ use APP\core\Application;
 use PKP\db\DAORegistry;
 use PKP\plugins\Hook;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
+use APP\plugins\generic\authorsHistory\classes\api\v1\AuthorsHistoryController;
+use APP\template\TemplateManager;
+use PKP\core\APIRouter;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -34,78 +37,32 @@ class AuthorsHistoryPlugin extends GenericPlugin
             $authorsHistoryDAO = new AuthorsHistoryDAO();
             DAORegistry::registerDAO('AuthorsHistoryDAO', $authorsHistoryDAO);
 
-            Hook::add('Template::Workflow::Publication', [$this, 'addToWorkflow']);
+            $request = Application::get()->getRequest();
+            $templateMgr = TemplateManager::getManager($request);
+            $templateMgr->addJavaScript(
+                'AuthorsHistory',
+                "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.iife.js",
+                [
+                    'inline' => false,
+                    'contexts' => ['backend'],
+                    'priority' => TemplateManager::STYLE_SEQUENCE_LAST,
+                ]
+            );
+            $templateMgr->addStyleSheet(
+                'AuthorsHistoryStyle',
+                "{$request->getBaseUrl()}/{$this->getPluginPath()}/public/build/build.css",
+                ['contexts' => ['backend']]
+            );
+
+            Hook::add('APIHandler::endpoints::plugin', function (string $hookName, APIRouter $router): bool {
+                $router->registerPluginApiControllers([
+                    new AuthorsHistoryController()
+                ]);
+                return Hook::CONTINUE;
+            });
         }
 
         return $success;
-    }
-
-    private function getAuthorsData($submission, $itemsPerPageLimit)
-    {
-        $listAuthorsData = [];
-        $publication = $submission->getCurrentPublication();
-        $correspondenceContact = $publication->getData('primaryContactId');
-        $contextId = $submission->getData('contextId');
-
-        foreach ($publication->getData('authors') as $author) {
-            $authorData = [
-                'name' => $author->getFullName(),
-                'orcid' => $author->getOrcid(),
-                'email' => $author->getEmail(),
-                'correspondingAuthor' => ($correspondenceContact == $author->getId()),
-            ];
-
-            $givenName = $author->getLocalizedGivenName();
-            $authorsHistoryDAO = new AuthorsHistoryDAO();
-
-            $authorData['submissions'] = $authorsHistoryDAO->getAuthorSubmissions(
-                $contextId,
-                $authorData['orcid'],
-                $authorData['email'],
-                $givenName,
-                $itemsPerPageLimit
-            );
-
-            $listAuthorsData[] = $authorData;
-        }
-        return $listAuthorsData;
-    }
-
-    public function addToWorkflow($hookName, $params)
-    {
-        $smarty = &$params[1];
-        $output = &$params[2];
-        $submission = $smarty->getTemplateVars('submission');
-        $request = Application::get()->getRequest();
-        $user = $request->getUser();
-
-        $smarty->assign(
-            'userIsManager',
-            $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
-        );
-        $itemsPerPage = $request->getContext()->getData('itemsPerPage');
-        $smarty->assign([
-            'listDataAuthors' => $this->getAuthorsData($submission, $itemsPerPage),
-            'itemsPerPage', $itemsPerPage,
-            'submissionType' => $this->getSubmissionType()
-        ]);
-
-        $output .= sprintf(
-            '<tab id="authorsHistory" label="%s">%s</tab>',
-            __('plugins.generic.authorsHistory.displayName'),
-            $smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))
-        );
-    }
-
-    private function getSubmissionType(): string
-    {
-        $applicationName = substr(Application::getName(), 0, 3);
-
-        if ($applicationName == 'ops') {
-            return 'preprint';
-        }
-
-        return 'article';
     }
 
     public function getDisplayName()
