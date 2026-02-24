@@ -144,7 +144,7 @@ onMounted(async () => {
   const { useFetch } = pkp.modules.useFetch;
 
   const { apiUrl } = useUrl(
-    `submissions/authorsHistory?submissionId=${props.submission.id}`
+    `authorsHistory?submissionId=${props.submission.id}`
   );
   const { data, fetch } = useFetch(apiUrl);
 
