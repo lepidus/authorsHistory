@@ -16,12 +16,14 @@ namespace APP\plugins\generic\authorsHistory;
 
 use PKP\plugins\GenericPlugin;
 use APP\core\Application;
+use PKP\core\PKPRequest;
 use PKP\db\DAORegistry;
 use PKP\plugins\Hook;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
 use APP\plugins\generic\authorsHistory\classes\api\v1\AuthorsHistoryController;
 use APP\template\TemplateManager;
 use PKP\core\APIRouter;
+use PKP\handler\APIHandler;
 
 class AuthorsHistoryPlugin extends GenericPlugin
 {
@@ -54,11 +56,22 @@ class AuthorsHistoryPlugin extends GenericPlugin
                 ['contexts' => ['backend']]
             );
 
-            Hook::add('APIHandler::endpoints::plugin', function (string $hookName, APIRouter $router): bool {
-                $router->registerPluginApiControllers([
-                    new AuthorsHistoryController()
-                ]);
-                return Hook::CONTINUE;
+            Hook::add('Dispatcher::dispatch', function (string $hookName, array $params): bool {
+                $request = $params[0];
+                $router = $request->getRouter();
+
+                if (!($router instanceof APIRouter)) {
+                    return Hook::CONTINUE;
+                }
+
+                if (!str_contains($request->getRequestPath(), 'api/v1/authorsHistory')) {
+                    return Hook::CONTINUE;
+                }
+
+                $handler = new APIHandler(new AuthorsHistoryController());
+                $router->setHandler($handler);
+                $handler->runRoutes();
+                exit;
             });
         }
 
