@@ -16,7 +16,6 @@ namespace APP\plugins\generic\authorsHistory;
 
 use PKP\plugins\GenericPlugin;
 use APP\core\Application;
-use PKP\core\PKPRequest;
 use PKP\db\DAORegistry;
 use PKP\plugins\Hook;
 use APP\plugins\generic\authorsHistory\classes\AuthorsHistoryDAO;
