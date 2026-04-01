@@ -31,11 +31,11 @@ describe('Checks history for an author', function () {
     });
 
     function beginSubmission() {
-        cy.get('label:contains("English")').click();
+        cy.contains('label', 'English').click();
         cy.setTinyMceContent('startSubmission-title-control', submissionData.title);
 
         if (Cypress.env('contextTitles').en !== 'Public Knowledge Preprint Server') {
-            cy.get('label:contains("' + submissionData.section + '")').click();
+            cy.contains('label', submissionData.section).click();
         }
 
         cy.get('input[name="submissionRequirements"]').check();

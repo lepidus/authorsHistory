@@ -59,9 +59,9 @@ class AuthorsHistoryController extends PKPBaseController
             );
         }
 
-        $submission = \APP\facades\Repo::submission()->get($submissionId);
+        $submission = $this->getValidatedSubmission($submissionId, $context);
 
-        if (!$submission || (int) $submission->getData('contextId') !== (int) $context->getId()) {
+        if (!$submission) {
             return response()->json(
                 ['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')],
                 Response::HTTP_NOT_FOUND
@@ -69,15 +69,32 @@ class AuthorsHistoryController extends PKPBaseController
         }
 
         $publication = $submission->getCurrentPublication();
-        $correspondenceContact = $publication->getData('primaryContactId');
         $contextId = (int) $context->getId();
         $itemsPerPage = (int) $context->getData('itemsPerPage');
         if ($itemsPerPage < 1) {
             $itemsPerPage = 25;
         }
 
+        $listAuthorsData = $this->buildAuthorsData($publication, $contextId, $itemsPerPage, $pkpRequest);
+
+        return response()->json($listAuthorsData, Response::HTTP_OK);
+    }
+
+    private function getValidatedSubmission(int $submissionId, $context)
+    {
+        $submission = \APP\facades\Repo::submission()->get($submissionId);
+
+        if (!$submission || (int) $submission->getData('contextId') !== (int) $context->getId()) {
+            return null;
+        }
+
+        return $submission;
+    }
+
+    private function buildAuthorsData($publication, int $contextId, int $itemsPerPage, $pkpRequest): array
+    {
+        $correspondenceContact = $publication->getData('primaryContactId');
         $authorsHistoryDAO = new AuthorsHistoryDAO();
-        $submissionType = $this->getSubmissionType();
         $listAuthorsData = [];
 
         foreach ($publication->getData('authors') as $author) {
@@ -88,48 +105,67 @@ class AuthorsHistoryController extends PKPBaseController
                 'correspondingAuthor' => ($correspondenceContact == $author->getId()),
             ];
 
-            $givenName = $author->getLocalizedGivenName();
             $authorSubmissions = $authorsHistoryDAO->getAuthorSubmissions(
                 $contextId,
                 $authorData['orcid'],
                 $authorData['email'],
-                $givenName,
+                $author->getLocalizedGivenName(),
                 $itemsPerPage
             );
 
-            $authorData['submissions'] = [];
-            foreach ($authorSubmissions as $authorSubmission) {
-                $currentPublication = $authorSubmission->getCurrentPublication();
-                $authorData['submissions'][] = [
-                    'id' => $authorSubmission->getId(),
-                    'title' => $currentPublication ? $currentPublication->getLocalizedFullTitle() : '',
-                    'status' => $authorSubmission->getData('status'),
-                    'statusLabel' => __($authorSubmission->getStatusKey()),
-                    'urlWorkflow' => $pkpRequest->getDispatcher()->url(
-                        $pkpRequest,
-                        Application::ROUTE_PAGE,
-                        null,
-                        'workflow',
-                        'access',
-                        [$authorSubmission->getId()]
-                    ),
-                    'urlPublished' => ($authorSubmission->getData('status') == PKPSubmission::STATUS_PUBLISHED)
-                        ? $pkpRequest->getDispatcher()->url(
-                            $pkpRequest,
-                            Application::ROUTE_PAGE,
-                            null,
-                            $submissionType,
-                            'view',
-                            [$authorSubmission->getBestId()]
-                        )
-                        : null,
-                ];
-            }
-
+            $authorData['submissions'] = $this->formatSubmissions($authorSubmissions, $pkpRequest);
             $listAuthorsData[] = $authorData;
         }
 
-        return response()->json($listAuthorsData, Response::HTTP_OK);
+        return $listAuthorsData;
+    }
+
+    private function formatSubmissions(array $authorSubmissions, $pkpRequest): array
+    {
+        $submissionType = $this->getSubmissionType();
+        $submissions = [];
+
+        foreach ($authorSubmissions as $authorSubmission) {
+            $currentPublication = $authorSubmission->getCurrentPublication();
+            $submissions[] = [
+                'id' => $authorSubmission->getId(),
+                'title' => $currentPublication ? $currentPublication->getLocalizedFullTitle() : '',
+                'status' => $authorSubmission->getData('status'),
+                'statusLabel' => __($authorSubmission->getStatusKey()),
+                'urlWorkflow' => $this->buildWorkflowUrl($pkpRequest, $authorSubmission),
+                'urlPublished' => $this->buildPublishedUrl($pkpRequest, $authorSubmission, $submissionType),
+            ];
+        }
+
+        return $submissions;
+    }
+
+    private function buildWorkflowUrl($pkpRequest, $submission): string
+    {
+        return $pkpRequest->getDispatcher()->url(
+            $pkpRequest,
+            Application::ROUTE_PAGE,
+            null,
+            'workflow',
+            'access',
+            [$submission->getId()]
+        );
+    }
+
+    private function buildPublishedUrl($pkpRequest, $submission, string $submissionType): ?string
+    {
+        if ($submission->getData('status') != PKPSubmission::STATUS_PUBLISHED) {
+            return null;
+        }
+
+        return $pkpRequest->getDispatcher()->url(
+            $pkpRequest,
+            Application::ROUTE_PAGE,
+            null,
+            $submissionType,
+            'view',
+            [$submission->getBestId()]
+        );
     }
 
     private function getSubmissionType(): string
