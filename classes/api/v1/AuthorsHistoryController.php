@@ -9,6 +9,8 @@ use Illuminate\Http\Request as IlluminateRequest;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Route;
 use PKP\core\PKPBaseController;
+use PKP\core\PKPRequest;
+use PKP\security\authorization\SubmissionAccessPolicy;
 use PKP\security\Role;
 use PKP\submission\PKPSubmission;
 
@@ -32,6 +34,12 @@ class AuthorsHistoryController extends PKPBaseController
         ];
     }
 
+    public function authorize(PKPRequest $request, array &$args, array $roleAssignments): bool
+    {
+        $this->addPolicy(new SubmissionAccessPolicy($request, $args, $roleAssignments));
+        return parent::authorize($request, $args, $roleAssignments);
+    }
+
     public function getGroupRoutes(): void
     {
         Route::get('', $this->getAuthorsHistory(...))
@@ -42,31 +50,7 @@ class AuthorsHistoryController extends PKPBaseController
     {
         $pkpRequest = Application::get()->getRequest();
         $context = $pkpRequest->getContext();
-
-        if (!$context) {
-            return response()->json(
-                ['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')],
-                Response::HTTP_NOT_FOUND
-            );
-        }
-
-        $submissionId = (int) $request->query('submissionId');
-
-        if ($submissionId < 1) {
-            return response()->json(
-                ['error' => __('plugins.generic.authorsHistory.error.submissionIdRequired')],
-                Response::HTTP_BAD_REQUEST
-            );
-        }
-
-        $submission = $this->getValidatedSubmission($submissionId, $context);
-
-        if (!$submission) {
-            return response()->json(
-                ['error' => __('plugins.generic.authorsHistory.error.submissionNotFound')],
-                Response::HTTP_NOT_FOUND
-            );
-        }
+        $submission = $this->getAuthorizedContextObject(Application::ASSOC_TYPE_SUBMISSION);
 
         $publication = $submission->getCurrentPublication();
         $contextId = (int) $context->getId();
@@ -78,17 +62,6 @@ class AuthorsHistoryController extends PKPBaseController
         $listAuthorsData = $this->buildAuthorsData($publication, $contextId, $itemsPerPage, $pkpRequest);
 
         return response()->json($listAuthorsData, Response::HTTP_OK);
-    }
-
-    private function getValidatedSubmission(int $submissionId, $context)
-    {
-        $submission = \APP\facades\Repo::submission()->get($submissionId);
-
-        if (!$submission || (int) $submission->getData('contextId') !== (int) $context->getId()) {
-            return null;
-        }
-
-        return $submission;
     }
 
     private function buildAuthorsData($publication, int $contextId, int $itemsPerPage, $pkpRequest): array
