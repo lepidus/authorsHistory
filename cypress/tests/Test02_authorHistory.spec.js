@@ -45,7 +45,7 @@ describe('Checks history for an author', function () {
 		cy.get('button.pkpModalConfirmButton').click();
     }
 
-    it('Creates new submission for an author', function() {
+    it('Creates new submission for an author, who cannot see the authors history', function() {
         cy.login('zwoods', null, 'publicknowledge');
         cy.get('div#myQueue a:contains("New Submission")').click();
         
@@ -56,6 +56,13 @@ describe('Checks history for an author', function () {
 
         cy.waitJQuery();
 		cy.get('h2:contains("Submission complete")');
+
+        cy.contains('a', 'Review this submission').click();
+        cy.url().should('include', 'authorDashboard');
+        cy.get('button[id="publication-button"]').click();
+        cy.get('button[id="titleAbstract-button"]');
+        cy.get('button[id="authorsHistory-button"]').should('not.exist');
+        cy.get('#authorsHistory').should('not.exist');
 		cy.logout();
     });
     it('Publishes new submission', function() {
