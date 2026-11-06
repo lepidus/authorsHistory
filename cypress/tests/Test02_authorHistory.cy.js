@@ -104,6 +104,16 @@ describe('Checks history for an author', function () {
             cy.contains('button', 'Submit').click();
         });
     });
+    it('Does not show authors history to the author in the author dashboard', function() {
+        cy.login('zwoods', null, 'publicknowledge');
+        cy.findSubmission('myQueue', submissionData.title);
+        cy.url().should('include', 'authorDashboard');
+        cy.get('#publication-button').click();
+        cy.get('#titleAbstract-button');
+        cy.get('#authorsHistory-button').should('not.exist');
+        cy.get('#authorsHistory').should('not.exist');
+        cy.logout();
+    });
     it('Publishes new submission', function() {
         cy.login('dbarnes', null, 'publicknowledge');
         cy.findSubmission('active', submissionData.title);
