@@ -11,6 +11,6 @@
   "license": "GPL-3",
   "devDependencies": {
     "@vitejs/plugin-vue": "^6.0.1",
-    "vite": "^7.1.0"
+    "vite": "^7.3.7"
   }
 }
