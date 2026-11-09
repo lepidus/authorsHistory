@@ -73,6 +73,10 @@ class AuthorsHistoryPlugin extends GenericPlugin
         $request = Application::get()->getRequest();
         $user = $request->getUser();
 
+        if (!$this->userCanViewAuthorsHistory($user, (int) $request->getContext()->getId())) {
+            return false;
+        }
+
         $smarty->assign(
             'userIsManager',
             $user->hasRole(Application::getWorkflowTypeRoles()[WORKFLOW_TYPE_EDITORIAL], $request->getContext()->getId())
@@ -91,6 +95,21 @@ class AuthorsHistoryPlugin extends GenericPlugin
             __('plugins.generic.authorsHistory.displayName'),
             $smarty->fetch($this->getTemplateResource('authorsHistory.tpl'))
         );
+    }
+
+    /**
+     * The authors history lists submissions from other users, so only editorial
+     * roles may see it. The Template::Workflow::Publication hook is also called
+     * in the author dashboard, where it must not be displayed.
+     */
+    public function userCanViewAuthorsHistory($user, int $contextId): bool
+    {
+        if (!$user) {
+            return false;
+        }
+
+        return $user->hasRole([ROLE_ID_MANAGER, ROLE_ID_SUB_EDITOR], $contextId)
+            || $user->hasRole([ROLE_ID_SITE_ADMIN], CONTEXT_SITE);
     }
 
     private function getSubmissionType(): string
